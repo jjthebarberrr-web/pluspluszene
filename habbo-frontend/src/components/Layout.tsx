@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { isLoggedIn, getUsername, clearAuth, apiGet } from "../api";
 import { useState, useEffect, useCallback } from "react";
-import { LogOut, ChevronDown, Gamepad2, Shield } from "lucide-react";
+import { LogOut, ChevronDown, Gamepad2 } from "lucide-react";
 import { HabboAvatar } from "./HabboAvatar";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -271,7 +271,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Economy <img src="https://fresh-hotel.org/nitro-assets-new/images/wallet/1.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
+                  Economy <img src="https://images.habbo.com/c_images/catalogue/icon_68.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                 </Link>
               </li>
 
@@ -300,7 +300,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         : "text-red-100 hover:bg-black/20 hover:text-white"
                     }`}
                   >
-                    <Shield className="w-4 h-4" /> Housekeeping
+                    Housekeeping <img src="https://images.habbo.com/c_images/catalogue/icon_19.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                   </Link>
                 </li>
               )}
