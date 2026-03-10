@@ -113,7 +113,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Navigation Bar - Only show when logged in */}
       {loggedIn && (
-        <nav className="border-b border-red-800/50 shadow-lg relative z-50" style={{background: 'linear-gradient(180deg, #4a0a0a 0%, #2a0505 100%)'}}>
+        <nav className="shadow-lg relative z-50" style={{background: 'linear-gradient(180deg, #4a0a0a 0%, #2a0505 100%)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '2px'}}>
           <div className="max-w-6xl mx-auto px-4">
             <ul className="flex items-center gap-0" style={{fontFamily: "'Ubuntu', 'Roboto', sans-serif", fontWeight: 500, fontSize: '13px'}}>
               {/* Home */}
