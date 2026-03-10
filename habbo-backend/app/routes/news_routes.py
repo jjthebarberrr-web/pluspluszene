@@ -54,12 +54,12 @@ async def get_news(page: int = 1, category: str = "all", db=Depends(get_db)):
 
     if category == "all":
         await cur.execute(
-            "SELECT id, title, content, image_url, author, category, created_at FROM news ORDER BY created_at DESC LIMIT %s OFFSET %s",
+            "SELECT n.id, n.title, n.content, n.image_url, n.author, n.category, n.created_at, COALESCE(u.look, '') as author_look FROM news n LEFT JOIN users u ON u.username = n.author ORDER BY n.created_at DESC LIMIT %s OFFSET %s",
             (limit, offset)
         )
     else:
         await cur.execute(
-            "SELECT id, title, content, image_url, author, category, created_at FROM news WHERE category = %s ORDER BY created_at DESC LIMIT %s OFFSET %s",
+            "SELECT n.id, n.title, n.content, n.image_url, n.author, n.category, n.created_at, COALESCE(u.look, '') as author_look FROM news n LEFT JOIN users u ON u.username = n.author WHERE n.category = %s ORDER BY n.created_at DESC LIMIT %s OFFSET %s",
             (category, limit, offset)
         )
 
@@ -74,6 +74,7 @@ async def get_news(page: int = 1, category: str = "all", db=Depends(get_db)):
             "author": row["author"],
             "category": row["category"],
             "created_at": row["created_at"],
+            "author_look": row["author_look"],
         })
 
     # Get reaction counts and comment counts for each article
@@ -101,7 +102,7 @@ async def get_news(page: int = 1, category: str = "all", db=Depends(get_db)):
 async def get_latest_news(db=Depends(get_db)):
     conn, cur = db
     await cur.execute(
-        "SELECT id, title, content, image_url, author, category, created_at FROM news ORDER BY created_at DESC LIMIT 5"
+        "SELECT n.id, n.title, n.content, n.image_url, n.author, n.category, n.created_at, COALESCE(u.look, '') as author_look FROM news n LEFT JOIN users u ON u.username = n.author ORDER BY n.created_at DESC LIMIT 5"
     )
     rows = await cur.fetchall()
     articles = []
@@ -114,6 +115,7 @@ async def get_latest_news(db=Depends(get_db)):
             "author": row["author"],
             "category": row["category"],
             "created_at": row["created_at"],
+            "author_look": row["author_look"],
         })
 
     return {"articles": articles}

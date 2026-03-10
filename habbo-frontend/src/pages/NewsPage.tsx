@@ -8,6 +8,7 @@ interface NewsArticle {
   content: string;
   image_url: string;
   author: string;
+  author_look: string;
   category: string;
   created_at: number;
   reactions?: Record<string, number>;
@@ -340,7 +341,7 @@ export function NewsPage() {
                 imageRendering: "pixelated",
               }}>
                 <HabboAvatar
-                  look="hd-180-1.ch-255-66.lg-280-110.sh-305-62.ha-1012-110.hr-828-61"
+                  look={selectedArticle.author_look || "hd-180-1.ch-255-66.lg-280-110.sh-305-62.ha-1012-110.hr-828-61"}
                   size="medium"
                   direction={2}
                 />
