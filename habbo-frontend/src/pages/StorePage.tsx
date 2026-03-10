@@ -173,22 +173,21 @@ export function StorePage() {
               </button>
             ))}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredItems.map((item) => (
-              <div key={item.id} className="rounded overflow-hidden relative">
-                {item.popular && <div className="absolute top-2 right-2 z-10 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded">Popular</div>}
-                <div className="bg-gradient-to-r from-sky-700 to-sky-600 px-3 py-2 text-white font-bold text-xs">{item.name}</div>
-                <div className="bg-zinc-900 p-4 border border-zinc-800 border-t-0 flex flex-col h-full">
-                  <p className="text-xs text-zinc-400 mb-4 flex-1">{item.description}</p>
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`font-bold ${currencyColor()}`}>{formatPrice(item.price)}</span>
-                      <span className="text-xs text-zinc-500">USD</span>
-                    </div>
-                    <button disabled={!loggedIn} className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-xs font-bold rounded transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                      {loggedIn ? "Buy" : "Login"}
-                    </button>
-                  </div>
+              <div key={item.id} className="bg-zinc-900 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all">
+                <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                  <span className="text-white font-bold text-sm">{item.name}</span>
+                  {item.popular && <span className="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded">Popular</span>}
+                </div>
+                <div className="px-4 py-3">
+                  <p className="text-xs text-zinc-400 leading-relaxed">{item.description}</p>
+                </div>
+                <div className="px-4 py-3 border-t border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+                  <span className={`font-bold text-lg ${currencyColor()}`}>{formatPrice(item.price)}</span>
+                  <button disabled={!loggedIn} className="px-5 py-2 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-xs font-bold rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    {loggedIn ? "Buy Now" : "Login to Buy"}
+                  </button>
                 </div>
               </div>
             ))}
