@@ -76,12 +76,20 @@ export function NewsPage() {
     loadComments(article.id);
   };
 
+  const [reactionPopup, setReactionPopup] = useState("");
+
   const handleReaction = async (emoji: string) => {
     if (!selectedArticle || !isLoggedIn()) return;
     try {
       await apiPost(`/api/news/${selectedArticle.id}/reactions`, { emoji });
       loadReactions(selectedArticle.id);
-    } catch { /* ignore */ }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("already reacted")) {
+        setReactionPopup("You already reacted! Click your current reaction to remove it first.");
+        setTimeout(() => setReactionPopup(""), 3500);
+      }
+    }
   };
 
   const handlePostComment = async () => {
@@ -183,6 +191,23 @@ export function NewsPage() {
                   );
                 })}
               </div>
+
+              {/* Reaction Popup */}
+              {reactionPopup && (
+                <div style={{
+                  marginTop: "10px",
+                  padding: "10px 14px",
+                  background: "rgba(92,34,158,0.15)",
+                  border: "1px solid rgba(92,34,158,0.4)",
+                  borderRadius: "6px",
+                  color: "#d8b4fe",
+                  fontSize: "13px",
+                  textAlign: "center",
+                  animation: "fadeIn 0.2s ease-in",
+                }}>
+                  {reactionPopup}
+                </div>
+              )}
             </div>
           </article>
         ) : (

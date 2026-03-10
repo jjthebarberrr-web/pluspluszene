@@ -233,20 +233,33 @@ async def toggle_reaction(article_id: int, req: ReactionRequest, request: Reques
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
+            # Check if user already reacted with THIS emoji (toggle off)
             await cur.execute(
                 "SELECT id FROM news_reactions WHERE article_id=%s AND user_id=%s AND emoji=%s",
                 (article_id, user_id, req.emoji)
             )
-            existing = await cur.fetchone()
-            if existing:
-                await cur.execute("DELETE FROM news_reactions WHERE id=%s", (existing[0],))
-                action = "removed"
-            else:
-                now = int(time.time())
-                await cur.execute(
-                    "INSERT INTO news_reactions (article_id, user_id, emoji, created_at) VALUES (%s,%s,%s,%s)",
-                    (article_id, user_id, req.emoji, now)
-                )
-                action = "added"
+            existing_same = await cur.fetchone()
+            if existing_same:
+                # Remove the reaction (toggle off)
+                await cur.execute("DELETE FROM news_reactions WHERE id=%s", (existing_same[0],))
+                await conn.commit()
+                return {"ok": True, "action": "removed"}
+
+            # Check if user already reacted with a DIFFERENT emoji
+            await cur.execute(
+                "SELECT id, emoji FROM news_reactions WHERE article_id=%s AND user_id=%s",
+                (article_id, user_id)
+            )
+            existing_other = await cur.fetchone()
+            if existing_other:
+                raise HTTPException(400, "You already reacted to this article! Remove your current reaction first by clicking it again.")
+
+            # Add new reaction
+            now = int(time.time())
+            await cur.execute(
+                "INSERT INTO news_reactions (article_id, user_id, emoji, created_at) VALUES (%s,%s,%s,%s)",
+                (article_id, user_id, req.emoji, now)
+            )
+            action = "added"
         await conn.commit()
     return {"ok": True, "action": action}
