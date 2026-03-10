@@ -109,11 +109,12 @@ export function HomePage() {
           {/* Room Preview / Welcome Banner */}
           <div className="rounded overflow-hidden">
             <div className="relative bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
-              <div className="h-52 relative overflow-hidden">
+              <div className="h-52 relative overflow-hidden" style={{background: '#1a1a1a'}}>
                 <img
-                  src="https://hab-blog.weebly.com/uploads/1/2/1/7/12173803/1560267_orig.gif"
+                  src="https://images.habbo.com/web_images/habbo-web-articles/lpromo_gen15_10.png"
                   alt="Hotel Scene"
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain"
+                  style={{imageRendering: 'pixelated'}}
                 />
                 {/* User avatar overlay */}
                 {profile && userLook && (
