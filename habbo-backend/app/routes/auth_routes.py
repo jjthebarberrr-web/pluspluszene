@@ -56,7 +56,7 @@ async def register(req: RegisterRequest, db=Depends(get_db)):
     await cur.execute(
         """INSERT INTO users (username, real_name, password, mail, gender, look, account_created, last_login, last_online, motto, ip_register, ip_current, `rank`, credits, pixels, points)
            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-        (req.username, req.username, hashed, req.email, req.gender, default_look, now, now, now, "I am new here!", "127.0.0.1", "127.0.0.1", 1, 50000, 50000, 50000)
+        (req.username, req.username, hashed, req.email, req.gender, default_look, now, now, now, "I am new here!", "127.0.0.1", "127.0.0.1", 1, 500, 200, 10)
     )
     user_id = cur.lastrowid
 
