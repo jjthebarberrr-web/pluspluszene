@@ -93,20 +93,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Navigation Bar - Only show when logged in */}
       {loggedIn && (
-        <nav className="bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-800/50 shadow-lg relative z-50">
+        <nav className="border-b border-red-800/50 shadow-lg relative z-50" style={{background: 'linear-gradient(180deg, #4a0a0a 0%, #2a0505 100%)'}}>
           <div className="max-w-6xl mx-auto px-4">
-            <ul className="flex items-center gap-0">
+            <ul className="flex items-center gap-0" style={{fontFamily: "'Ubuntu', 'Roboto', sans-serif", fontWeight: 500, fontSize: '13px'}}>
               {/* Home */}
               <li>
                 <Link
                   to="/"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
                     location.pathname === "/"
-                      ? "bg-black/30 text-white"
+                      ? "bg-black/40 text-white border-white/30"
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Home
+                  Home <img src="https://fresh-hotel.org/image/nav/nest_small.gif" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                 </Link>
               </li>
 
@@ -114,13 +114,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <Link
                   to="/news"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
                     isActive("/news")
-                      ? "bg-black/30 text-white"
+                      ? "bg-black/40 text-white border-white/30"
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  News
+                  News <img src="https://fresh-hotel.org/image/nav/my_2.gif" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                 </Link>
               </li>
 
@@ -131,14 +131,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 onMouseLeave={() => setCommunityOpen(false)}
               >
                 <button
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
                     isAnyCommunityActive()
-                      ? "bg-black/30 text-white"
+                      ? "bg-black/40 text-white border-white/30"
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Community
-                  <ChevronDown className="w-3 h-3 opacity-60" />
+                  Community<img src="https://fresh-hotel.org/image/nav/icon_203.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                 </button>
                 {communityOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-52 z-50">
@@ -175,13 +174,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <Link
                   to="/leaderboards"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
                     isActive("/leaderboards")
-                      ? "bg-black/30 text-white"
+                      ? "bg-black/40 text-white border-white/30"
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Leaderboards
+                  Leaderboards <img src="https://fresh-hotel.org/image/nav/bb.gif" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                 </Link>
               </li>
 
@@ -189,9 +188,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <Link
                   to="/store"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
                     isActive("/store")
-                      ? "bg-black/30 text-white"
+                      ? "bg-black/40 text-white border-white/30"
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
@@ -206,9 +205,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 onMouseLeave={() => setMeOpen(false)}
               >
                 <button
-                  className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-4 py-1 transition-all border border-transparent hover:border-white/30 ${
                     isActive("/me")
-                      ? "bg-black/30 text-white"
+                      ? "bg-black/40 text-white border-white/30"
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
@@ -245,7 +244,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <li className="ml-auto">
                 <Link
                   to="/client"
-                  className="flex items-center gap-1.5 px-5 py-3 text-sm font-bold text-yellow-300 hover:bg-black/20 hover:text-yellow-200 transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2.5 font-bold text-yellow-300 hover:bg-black/20 hover:text-yellow-200 transition-all border border-transparent hover:border-white/30"
                 >
                   <Gamepad2 className="w-4 h-4" />
                   Enter Hotel

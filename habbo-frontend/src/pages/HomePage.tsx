@@ -188,15 +188,23 @@ export function HomePage() {
             <div className="bg-gradient-to-r from-purple-700 to-purple-600 px-4 py-2 text-white font-bold text-sm text-center tracking-wide">
               Online Users
             </div>
-            <div className="bg-zinc-900 border border-zinc-800 border-t-0 p-3">
+            <div className="bg-zinc-900 border border-zinc-800 border-t-0 p-2.5">
               {homeData?.online_users && homeData.online_users.length > 0 ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
                   {homeData.online_users.map((user) => (
-                    <div key={user.id} className="bg-zinc-800 rounded px-2 py-2 flex items-center gap-2 border border-zinc-700 hover:border-zinc-600 transition-all">
-                      <div className="w-8 h-8 flex-shrink-0 overflow-hidden">
+                    <div
+                      key={user.id}
+                      className="flex items-center h-12 px-2 rounded"
+                      style={{
+                        background: '#A4A4A4',
+                        border: '2px solid #E0E0E0',
+                        boxShadow: '0 0 0 1px #4D4D4D, 0 1px 0 1px #4D4D4D',
+                      }}
+                    >
+                      <div className="w-10 h-12 relative overflow-hidden flex-shrink-0" style={{imageRendering: 'pixelated'}}>
                         <HabboAvatar look={user.look} size="small" />
                       </div>
-                      <span className="text-xs text-teal-300 font-medium truncate">{user.username}</span>
+                      <span className="text-xs font-semibold text-white ml-1 truncate" style={{textShadow: '1px 1px 1px #000'}}>{user.username}</span>
                     </div>
                   ))}
                 </div>
