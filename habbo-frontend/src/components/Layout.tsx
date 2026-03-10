@@ -194,7 +194,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Store
+                  Store 🛍️
                 </Link>
               </li>
 

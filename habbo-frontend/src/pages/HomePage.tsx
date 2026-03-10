@@ -111,7 +111,7 @@ export function HomePage() {
             <div className="relative bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
               <div className="h-52 relative overflow-hidden" style={{background: '#1a1a1a'}}>
                 <img
-                  src="https://images.habbo.com/web_images/habbo-web-articles/lpromo_gen15_10.png"
+                  src="https://images.habbo.com/web_images/habbo-web-articles/lpromo_townhall_sep25.png"
                   alt="Hotel Scene"
                   className="absolute inset-0 w-full h-full object-contain"
                   style={{imageRendering: 'pixelated'}}
