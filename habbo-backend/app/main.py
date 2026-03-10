@@ -78,7 +78,7 @@ _TRANSPARENT_1PX_PNG = base64.b64decode(
 def get_http_client():
     global _http_client
     if _http_client is None:
-        _http_client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
+        _http_client = httpx.AsyncClient(timeout=3.0, follow_redirects=True)
     return _http_client
 
 @app.get("/habbo-assets/{asset_path:path}")
@@ -140,6 +140,15 @@ async def proxy_assets(asset_path: str):
             str(cached_file),
             headers={"Cache-Control": "public, max-age=86400"},
         )
+    # For .nitro files, serve dummy immediately if not cached (skip slow CDN)
+    if asset_path.endswith(".nitro"):
+        dummy_path = LOCAL_ASSETS_DIR / "dummy.nitro"
+        if dummy_path.is_file():
+            return FileResponse(
+                str(dummy_path),
+                media_type="application/octet-stream",
+                headers={"Cache-Control": "public, max-age=86400"},
+            )
     client = get_http_client()
     for cdn_base in GENERAL_CDNS:
         try:
