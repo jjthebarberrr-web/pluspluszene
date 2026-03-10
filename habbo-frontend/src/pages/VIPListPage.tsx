@@ -31,10 +31,10 @@ const rankIcons: Record<string, React.ReactNode> = {
 };
 
 const rankBadgeColors: Record<number, string> = {
-  11: "bg-cyan-900/50 text-cyan-300 border-cyan-700/50",
-  10: "bg-yellow-900/50 text-yellow-300 border-yellow-700/50",
-  9: "bg-zinc-700/50 text-zinc-300 border-zinc-500/50",
-  8: "bg-orange-900/50 text-orange-300 border-orange-700/50",
+  5: "bg-cyan-900/50 text-cyan-300 border-cyan-700/50",
+  4: "bg-yellow-900/50 text-yellow-300 border-yellow-700/50",
+  3: "bg-zinc-700/50 text-zinc-300 border-zinc-500/50",
+  2: "bg-orange-900/50 text-orange-300 border-orange-700/50",
 };
 
 export function VIPListPage() {
