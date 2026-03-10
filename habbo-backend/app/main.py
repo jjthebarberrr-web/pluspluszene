@@ -169,6 +169,15 @@ async def proxy_assets(asset_path: str):
             media_type="image/png",
             headers={"Cache-Control": "public, max-age=3600"},
         )
+    # Return dummy .nitro for missing figure/furniture assets (prevents client stalling)
+    if asset_path.endswith(".nitro"):
+        dummy_path = LOCAL_ASSETS_DIR / "dummy.nitro"
+        if dummy_path.is_file():
+            return FileResponse(
+                str(dummy_path),
+                media_type="application/octet-stream",
+                headers={"Cache-Control": "public, max-age=86400"},
+            )
     return Response(content=b"Asset not found", status_code=404)
 
 

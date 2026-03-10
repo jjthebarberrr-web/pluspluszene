@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "";
 const BASIC_AUTH = import.meta.env.VITE_API_BASIC_AUTH || "";
 
 function getHeaders(): Record<string, string> {
