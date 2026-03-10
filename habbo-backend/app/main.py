@@ -21,6 +21,7 @@ from app.routes.leaderboard_routes import router as leaderboard_router
 from app.routes.home_routes import router as home_router
 from app.routes.photos_routes import router as photos_router
 from app.routes.vip_routes import router as vip_router
+from app.routes.housekeeping_routes import router as housekeeping_router
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
@@ -50,6 +51,7 @@ app.include_router(leaderboard_router)
 app.include_router(home_router)
 app.include_router(photos_router)
 app.include_router(vip_router)
+app.include_router(housekeeping_router)
 
 
 @app.get("/healthz")
@@ -82,7 +84,7 @@ _TRANSPARENT_1PX_PNG = base64.b64decode(
 def get_http_client():
     global _http_client
     if _http_client is None:
-        _http_client = httpx.AsyncClient(timeout=3.0, follow_redirects=True)
+        _http_client = httpx.AsyncClient(timeout=15.0, follow_redirects=True)
     return _http_client
 
 @app.get("/habbo-assets/{asset_path:path}")
@@ -140,19 +142,23 @@ async def proxy_assets(asset_path: str):
     # Non-c_images assets: check local cache first, then try multiple CDNs
     cached_file = LOCAL_ASSETS_DIR / asset_path
     if cached_file.is_file():
+        # Determine correct media type - .nitro files must be application/octet-stream
+        _media = "application/octet-stream"
+        if asset_path.endswith(".json"):
+            _media = "application/json"
+        elif asset_path.endswith(".png"):
+            _media = "image/png"
+        elif asset_path.endswith(".gif"):
+            _media = "image/gif"
+        elif asset_path.endswith(".jpg") or asset_path.endswith(".jpeg"):
+            _media = "image/jpeg"
+        elif asset_path.endswith(".mp3"):
+            _media = "audio/mpeg"
         return FileResponse(
             str(cached_file),
+            media_type=_media,
             headers={"Cache-Control": "public, max-age=86400"},
         )
-    # For .nitro files, serve dummy immediately if not cached (skip slow CDN)
-    if asset_path.endswith(".nitro"):
-        dummy_path = LOCAL_ASSETS_DIR / "dummy.nitro"
-        if dummy_path.is_file():
-            return FileResponse(
-                str(dummy_path),
-                media_type="application/octet-stream",
-                headers={"Cache-Control": "public, max-age=86400"},
-            )
     client = get_http_client()
     for cdn_base in GENERAL_CDNS:
         try:
@@ -160,7 +166,7 @@ async def proxy_assets(asset_path: str):
             if resp.status_code == 200:
                 content_type = resp.headers.get("content-type", "application/octet-stream")
                 # Don't cache HTML error pages
-                if b"<!DOCTYPE" not in resp.content[:50]:
+                if b"<!DOCTYPE" not in resp.content[:50] and b"<html>" not in resp.content[:50]:
                     try:
                         cached_file.parent.mkdir(parents=True, exist_ok=True)
                         cached_file.write_bytes(resp.content)
@@ -182,15 +188,26 @@ async def proxy_assets(asset_path: str):
             media_type="image/png",
             headers={"Cache-Control": "public, max-age=3600"},
         )
-    # Return dummy .nitro for missing figure/furniture assets (prevents client stalling)
+    # Serve valid minimal .nitro for missing files (client hangs on 404)
     if asset_path.endswith(".nitro"):
-        dummy_path = LOCAL_ASSETS_DIR / "dummy.nitro"
-        if dummy_path.is_file():
-            return FileResponse(
-                str(dummy_path),
-                media_type="application/octet-stream",
-                headers={"Cache-Control": "public, max-age=86400"},
-            )
+        import struct, gzip, json as _json
+        lib_name = asset_path.rsplit("/", 1)[-1].replace(".nitro", "")
+        manifest = {"type": "generic", "name": lib_name, "assets": {}, "visualization": {}}
+        compressed = gzip.compress(_json.dumps(manifest).encode())
+        name_bytes = f"{lib_name}.json".encode()
+        nitro = struct.pack(">H", 1) + struct.pack(">H", len(name_bytes)) + name_bytes + struct.pack(">I", len(compressed)) + compressed
+        # Cache it so next request is fast
+        try:
+            cached_file.parent.mkdir(parents=True, exist_ok=True)
+            cached_file.write_bytes(nitro)
+        except Exception:
+            pass
+        return Response(
+            content=nitro,
+            status_code=200,
+            media_type="application/octet-stream",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
     return Response(content=b"Asset not found", status_code=404)
 
 
@@ -199,34 +216,56 @@ ARCTURUS_WS_URL = os.getenv("ARCTURUS_WS_URL", "ws://127.0.0.1:2096")
 
 @app.websocket("/ws")
 async def websocket_proxy(ws: WebSocket):
+    import logging as _logging
+    import struct as _struct
+    _wsl = _logging.getLogger("uvicorn.error")
     await ws.accept()
     try:
         async with websockets.connect(ARCTURUS_WS_URL) as arcturus_ws:
+            _wsl.info("WS: Connected to Arcturus")
+
             async def forward_to_arcturus():
                 try:
+                    _c2a = 0
                     while True:
                         msg = await ws.receive()
                         if msg.get("type") == "websocket.receive":
                             if "bytes" in msg and msg["bytes"]:
-                                await arcturus_ws.send(msg["bytes"])
+                                _c2a += 1
+                                _d = msg["bytes"]
+                                if _c2a <= 20 and len(_d) >= 6:
+                                    _plen = _struct.unpack(">I", _d[:4])[0]
+                                    _pid = _struct.unpack(">H", _d[4:6])[0]
+                                    _wsl.info("WS C->A #%d: header=%d len=%d", _c2a, _pid, _plen)
+                                await arcturus_ws.send(_d)
                             elif "text" in msg and msg["text"]:
+                                _c2a += 1
                                 await arcturus_ws.send(msg["text"])
                         elif msg.get("type") == "websocket.disconnect":
+                            _wsl.info("WS: Client disconnected after %d msgs", _c2a)
                             break
                 except WebSocketDisconnect:
                     pass
-                except Exception:
-                    pass
+                except Exception as e:
+                    _wsl.error("WS C->A error: %s", e)
 
             async def forward_to_client():
                 try:
+                    _a2c = 0
                     async for message in arcturus_ws:
+                        _a2c += 1
                         if isinstance(message, bytes):
+                            if _a2c <= 50 and len(message) >= 6:
+                                _plen = _struct.unpack(">I", message[:4])[0]
+                                _pid = _struct.unpack(">H", message[4:6])[0]
+                                _wsl.info("WS A->C #%d: header=%d len=%d raw=%d", _a2c, _pid, _plen, len(message))
+                            elif _a2c == 51:
+                                _wsl.info("WS A->C: suppressing further logs (>50 msgs)")
                             await ws.send_bytes(message)
                         else:
                             await ws.send_text(message)
-                except Exception:
-                    pass
+                except Exception as e:
+                    _wsl.error("WS A->C error: %s", e)
 
             task1 = asyncio.create_task(forward_to_arcturus())
             task2 = asyncio.create_task(forward_to_client())

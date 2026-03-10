@@ -61,6 +61,18 @@ export async function apiPut(path: string, body: Record<string, unknown>) {
   return res.json();
 }
 
+export async function apiDelete(path: string) {
+  const res = await tunnelFetch(`${API_URL}${path}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Request failed" }));
+    throw new Error(err.detail || "Request failed");
+  }
+  return res.json();
+}
+
 // Auth helpers
 export function setAuth(token: string, username: string, userId: number) {
   localStorage.setItem("token", token);

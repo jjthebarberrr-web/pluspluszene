@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { isLoggedIn, getUsername, clearAuth, apiGet } from "../api";
 import { useState, useEffect, useCallback } from "react";
-import { LogOut, ChevronDown, Gamepad2 } from "lucide-react";
+import { LogOut, ChevronDown, Gamepad2, Shield } from "lucide-react";
 import { HabboAvatar } from "./HabboAvatar";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -14,6 +14,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [userLook, setUserLook] = useState("");
   const [onlineCount, setOnlineCount] = useState(0);
   const [factIndex, setFactIndex] = useState(0);
+  const [userRank, setUserRank] = useState(0);
 
   const facts = [
     "Did you know: This website and theme was coded by JJ",
@@ -39,6 +40,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (loggedIn) {
       apiGet("/api/auth/me").then((data) => {
         if (data.look) setUserLook(data.look);
+        if (data.rank) setUserRank(data.rank);
       }).catch(() => {});
     }
     // Fetch online count initially and every 1 second
@@ -286,6 +288,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   Store 🛍️
                 </Link>
               </li>
+
+              {/* Housekeeping - Staff only (rank 6+) */}
+              {userRank >= 6 && (
+                <li>
+                  <Link
+                    to="/housekeeping"
+                    className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
+                      isActive("/housekeeping")
+                        ? "bg-black/40 text-white border-white/30"
+                        : "text-red-100 hover:bg-black/20 hover:text-white"
+                    }`}
+                  >
+                    <Shield className="w-4 h-4" /> Housekeeping
+                  </Link>
+                </li>
+              )}
 
               {/* Me Dropdown - avatar + username like Fresh Hotel */}
               <li
