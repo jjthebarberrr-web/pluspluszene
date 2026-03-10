@@ -17,7 +17,7 @@ export function EconomyGuidePage() {
         {/* Credits */}
         <div className="rounded overflow-hidden border border-yellow-700/50">
           <div className="bg-gradient-to-r from-yellow-800 to-yellow-600 px-4 py-3 flex items-center gap-3">
-            <img src="https://fresh-hotel.org/nitro-assets-new/images/wallet/1.png" alt="Credits" className="w-6 h-6" />
+            <img src="https://fresh-hotel.org/assets/images/hotel/purses/credits-icon.png" alt="Credits" className="w-6 h-6" style={{imageRendering: 'pixelated'}} />
             <div className="text-white font-bold text-sm">Credits</div>
           </div>
           <div className="bg-zinc-900 p-4 space-y-3">
@@ -63,7 +63,7 @@ export function EconomyGuidePage() {
         {/* Diamonds */}
         <div className="rounded overflow-hidden border border-sky-500/50">
           <div className="bg-gradient-to-r from-sky-700 to-sky-500 px-4 py-3 flex items-center gap-3">
-            <img src="https://fresh-hotel.org/nitro-assets-new/images/wallet/0.png" alt="Diamonds" className="w-6 h-6" />
+            <img src="https://fresh-hotel.org//nitro-assets-new/images/wallet/5.png" alt="Diamonds" className="w-6 h-6" style={{imageRendering: 'pixelated'}} />
             <div className="text-white font-bold text-sm">Diamonds</div>
           </div>
           <div className="bg-zinc-900 p-4 space-y-3">
