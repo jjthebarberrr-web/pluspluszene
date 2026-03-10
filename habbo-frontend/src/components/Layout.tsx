@@ -204,6 +204,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
 
+              {/* Economy Guide */}
+              <li>
+                <Link
+                  to="/economy"
+                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
+                    isActive("/economy")
+                      ? "bg-black/40 text-white border-white/30"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Economy <img src="https://fresh-hotel.org/nitro-assets-new/images/wallet/1.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
+                </Link>
+              </li>
+
               {/* Store */}
               <li>
                 <Link

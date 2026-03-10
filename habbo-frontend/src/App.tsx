@@ -14,6 +14,7 @@ import { OldStaffPage } from "./pages/OldStaffPage";
 import { VIPListPage } from "./pages/VIPListPage";
 import { RareValuesPage } from "./pages/RareValuesPage";
 import { LeaderboardsPage } from "./pages/LeaderboardsPage";
+import { EconomyGuidePage } from "./pages/EconomyGuidePage";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/vip-list" element={<VIPListPage />} />
           <Route path="/rare-values" element={<RareValuesPage />} />
           <Route path="/leaderboards" element={<LeaderboardsPage />} />
+          <Route path="/economy" element={<EconomyGuidePage />} />
           <Route path="/client" element={<ClientPage />} />
         </Routes>
       </Layout>
