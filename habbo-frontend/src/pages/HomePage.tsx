@@ -126,10 +126,6 @@ export function HomePage() {
                 <Link to="/client" className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-green-600 hover:bg-green-700 px-6 py-2.5 rounded font-bold text-white text-sm tracking-wide transition-all shadow-lg uppercase">
                   Enter Hotel
                 </Link>
-                {/* Hotel name overlay */}
-                <div className="absolute top-3 left-4 z-10 bg-black/60 backdrop-blur-sm px-4 py-1.5 rounded">
-                  <span className="text-white font-black text-sm tracking-wide">HABBORETRO</span>
-                </div>
               </div>
               {/* Currency Bar */}
               {profile && (

@@ -100,14 +100,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      {/* Scrolling Facts Marquee - Above nav */}
-      <div className="w-full overflow-hidden" style={{background: 'linear-gradient(180deg, #1a0505 0%, #0d0202 100%)', borderBottom: '1px solid #3a0a0a'}}>
-        <div className="max-w-6xl mx-auto px-4 py-1.5 flex items-center justify-center">
-          <span className="text-xs text-yellow-300/90 font-medium tracking-wide text-center transition-opacity duration-500" style={{fontFamily: "'Ubuntu', sans-serif"}}>
-            {facts[factIndex]}
-          </span>
+      {/* Scrolling Facts Marquee - Directly above nav */}
+      {loggedIn && (
+        <div className="w-full overflow-hidden" style={{background: 'linear-gradient(90deg, #2a0505 0%, #4a0a0a 50%, #2a0505 100%)', borderTop: '1px solid #5a1515', borderBottom: '1px solid #5a1515'}}>
+          <div className="max-w-6xl mx-auto px-4 py-1 flex items-center justify-center">
+            <span className="text-yellow-300 font-semibold tracking-wide text-center" style={{fontFamily: "'Ubuntu', sans-serif", fontSize: '11px'}}>
+              ★ {facts[factIndex]} ★
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Navigation Bar - Only show when logged in */}
       {loggedIn && (
