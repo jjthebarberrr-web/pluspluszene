@@ -1,16 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiPost, setAuth, isLoggedIn, getUsername } from "../api";
-import { Gamepad2 } from "lucide-react";
+import { apiPost, apiGet, setAuth, isLoggedIn } from "../api";
+import { Gamepad2, Users, DoorOpen } from "lucide-react";
+import { HabboAvatar } from "../components/HabboAvatar";
+
+interface Room {
+  id: number;
+  name: string;
+  owner: string;
+  users: number;
+  max_users: number;
+}
+
+interface OnlineUser {
+  id: number;
+  username: string;
+  look: string;
+  motto: string;
+}
+
+interface NewsItem {
+  id: number;
+  title: string;
+  category: string;
+  created_at: number;
+}
+
+interface UserOfWeek {
+  id: number;
+  username: string;
+  look: string;
+  motto: string;
+}
+
+interface HomeData {
+  popular_rooms: Room[];
+  online_users: OnlineUser[];
+  online_count: number;
+  user_of_week: UserOfWeek | null;
+  latest_news: NewsItem[];
+}
+
+interface UserProfile {
+  credits: number;
+  pixels: number;
+  diamonds: number;
+  look: string;
+}
 
 export function HomePage() {
   const navigate = useNavigate();
   const loggedIn = isLoggedIn();
-  const username = getUsername();
   const [loginUser, setLoginUser] = useState("");
   const [loginPass, setLoginPass] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [homeData, setHomeData] = useState<HomeData | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    if (loggedIn) {
+      apiGet("/api/home").then(setHomeData).catch(() => {});
+      apiGet("/api/auth/me").then(setProfile).catch(() => {});
+    }
+  }, [loggedIn]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,51 +80,166 @@ export function HomePage() {
     }
   };
 
+  const formatDate = (ts: number) => {
+    if (!ts) return "";
+    const d = new Date(ts * 1000);
+    const day = d.getDate().toString().padStart(2, "0");
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${day}-${months[d.getMonth()]} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  };
+
+  const getCategoryColor = (cat: string) => {
+    switch (cat) {
+      case "announcement": return "bg-red-600";
+      case "event": return "bg-purple-600";
+      case "update": return "bg-blue-600";
+      default: return "bg-zinc-600";
+    }
+  };
+
   if (loggedIn) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Room Preview / Welcome Banner */}
           <div className="rounded overflow-hidden">
-            <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-              Welcome Back
-            </div>
-            <div className="bg-zinc-900 p-6 border border-zinc-800 border-t-0">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-teal-400 rounded-xl flex items-center justify-center">
-                  <Gamepad2 className="w-8 h-8 text-white" />
+            <div className="relative bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
+              <div className="h-48 bg-gradient-to-br from-purple-900/40 via-zinc-900 to-teal-900/30 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10" style={{backgroundImage: "url('https://images.habbo.com/c_images/web_promo/lpromo_HabboWay2.png')", backgroundSize: "cover", backgroundPosition: "center"}} />
+                <div className="relative z-10 text-center">
+                  <h2 className="text-2xl font-black text-white tracking-tight">Welcome to <span className="text-purple-400">Fresh</span> Hotel</h2>
+                  <p className="text-zinc-400 text-sm mt-1">Create, explore, and connect with friends</p>
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-white">Welcome back, {username}!</h2>
-                  <p className="text-zinc-400 mt-1">Ready to enter the hotel?</p>
-                </div>
-                <Link
-                  to="/client"
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white font-bold rounded-lg shadow-lg shadow-purple-500/20 transition-all"
-                >
-                  Enter Hotel
-                </Link>
               </div>
+              {/* Currency Bar */}
+              {profile && (
+                <div className="flex items-center gap-4 px-4 py-2.5 bg-black/60 border-t border-zinc-700 text-sm">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-yellow-400" />
+                    <span className="text-yellow-400 font-bold">{profile.credits.toLocaleString()}</span>
+                    <span className="text-zinc-500">Credits</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-400" />
+                    <span className="text-purple-400 font-bold">{profile.pixels.toLocaleString()}</span>
+                    <span className="text-zinc-500">Duckets</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-sky-400" />
+                    <span className="text-sky-400 font-bold">{profile.diamonds.toLocaleString()}</span>
+                    <span className="text-zinc-500">Diamonds</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Popular Rooms */}
+          <div className="rounded overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-600 to-amber-500 px-4 py-2 text-white font-bold text-sm text-center tracking-wide">
+              Popular Rooms
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 border-t-0 divide-y divide-zinc-800">
+              {homeData?.popular_rooms && homeData.popular_rooms.length > 0 ? (
+                homeData.popular_rooms.map((room) => (
+                  <div key={room.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-800/50 transition-all">
+                    <div className="w-8 h-8 bg-zinc-800 rounded flex items-center justify-center border border-zinc-700">
+                      <DoorOpen className="w-4 h-4 text-zinc-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white font-medium truncate">{room.name}</p>
+                      <p className="text-xs text-zinc-500">by {room.owner}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <Users className="w-3.5 h-3.5 text-green-400" />
+                      <span className="text-green-400 font-bold">{room.users}</span>
+                    </div>
+                    <Link
+                      to="/client"
+                      className="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-xs text-zinc-300 hover:text-white rounded transition-all font-medium"
+                    >
+                      Go to room
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-6 text-center text-sm text-zinc-500">No rooms available yet</div>
+              )}
+            </div>
+          </div>
+
+          {/* Online Users */}
+          <div className="rounded overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-700 to-purple-600 px-4 py-2 text-white font-bold text-sm text-center tracking-wide">
+              Online Users
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 border-t-0 p-3">
+              {homeData?.online_users && homeData.online_users.length > 0 ? (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                  {homeData.online_users.map((user) => (
+                    <div key={user.id} className="bg-zinc-800 rounded px-2 py-2 flex items-center gap-2 border border-zinc-700 hover:border-zinc-600 transition-all">
+                      <div className="w-8 h-8 flex-shrink-0 overflow-hidden">
+                        <HabboAvatar look={user.look} size="small" />
+                      </div>
+                      <span className="text-xs text-teal-300 font-medium truncate">{user.username}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500 text-center py-4">No users online right now</p>
+              )}
             </div>
           </div>
         </div>
-        <div>
+
+        {/* Right Sidebar */}
+        <div className="space-y-4">
+          {/* Latest News */}
           <div className="rounded overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-700 to-purple-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-              Quick Links
+            <div className="bg-gradient-to-r from-sky-600 to-sky-500 px-4 py-2 text-white font-bold text-sm text-center tracking-wide">
+              Latest News
             </div>
-            <div className="bg-zinc-900 p-4 border border-zinc-800 border-t-0 space-y-2">
-              <Link to="/me" className="block px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded text-sm text-zinc-300 hover:text-white transition-all">
-                My Profile
-              </Link>
-              <Link to="/community" className="block px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded text-sm text-zinc-300 hover:text-white transition-all">
-                Community
-              </Link>
-              <Link to="/staff" className="block px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded text-sm text-zinc-300 hover:text-white transition-all">
-                Staff Team
-              </Link>
-              <Link to="/store" className="block px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded text-sm text-zinc-300 hover:text-white transition-all">
-                Store
-              </Link>
+            <div className="bg-zinc-900 border border-zinc-800 border-t-0 divide-y divide-zinc-800">
+              {homeData?.latest_news && homeData.latest_news.length > 0 ? (
+                homeData.latest_news.map((article) => (
+                  <Link key={article.id} to="/news" className="flex items-start gap-3 px-3 py-2.5 hover:bg-zinc-800/50 transition-all group">
+                    <div className={`w-8 h-8 rounded flex-shrink-0 flex items-center justify-center ${getCategoryColor(article.category)}`}>
+                      <span className="text-white text-xs font-bold">{article.category.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-300 group-hover:text-white transition-all font-medium truncate">{article.title}</p>
+                      <p className="text-xs text-zinc-600 mt-0.5">{formatDate(article.created_at)}</p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="px-4 py-6 text-center text-sm text-zinc-500">No news yet</div>
+              )}
+            </div>
+          </div>
+
+          {/* Fresh of the Week */}
+          <div className="rounded overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-white font-bold text-sm text-center tracking-wide">
+              Fresh of the Week
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 border-t-0 p-4">
+              {homeData?.user_of_week ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 bg-zinc-800 rounded-lg overflow-hidden border border-zinc-700 flex items-center justify-center">
+                    <HabboAvatar look={homeData.user_of_week.look} size="medium" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold">{homeData.user_of_week.username}</p>
+                    {homeData.user_of_week.motto && (
+                      <p className="text-xs text-zinc-400 italic mt-0.5">"{homeData.user_of_week.motto}"</p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500 text-center">Coming soon</p>
+              )}
             </div>
           </div>
         </div>
@@ -85,7 +253,7 @@ export function HomePage() {
       <div className="lg:col-span-2">
         <div className="rounded overflow-hidden">
           <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-            Login to HabboRetro
+            Login to Fresh Hotel
           </div>
           <div className="bg-zinc-900 p-6 border border-zinc-800 border-t-0">
             <form onSubmit={handleLogin} className="space-y-3">
@@ -140,7 +308,7 @@ export function HomePage() {
       <div className="space-y-4">
         <div className="rounded overflow-hidden">
           <div className="bg-gradient-to-r from-purple-700 to-purple-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-            About HabboRetro
+            About Fresh Hotel
           </div>
           <div className="bg-zinc-900 p-5 border border-zinc-800 border-t-0">
             <div className="flex items-center gap-3 mb-4">
@@ -148,12 +316,12 @@ export function HomePage() {
                 <Gamepad2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-white">HabboRetro</h3>
+                <h3 className="font-bold text-white">Fresh Hotel</h3>
                 <p className="text-xs text-zinc-500">Virtual World</p>
               </div>
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              Welcome to HabboRetro! Create your avatar, design your room, chat with friends, and explore our virtual world. Join thousands of players in the ultimate retro hotel experience.
+              Welcome to Fresh Hotel! Create your avatar, design your room, chat with friends, and explore our virtual world. Join thousands of players in the ultimate retro hotel experience.
             </p>
           </div>
         </div>

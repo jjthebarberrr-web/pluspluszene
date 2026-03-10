@@ -1,7 +1,8 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { isLoggedIn, getUsername, clearAuth } from "../api";
-import { useState } from "react";
+import { isLoggedIn, getUsername, clearAuth, apiGet } from "../api";
+import { useState, useEffect } from "react";
 import { LogOut, ChevronDown, Gamepad2 } from "lucide-react";
+import { HabboAvatar } from "./HabboAvatar";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -10,6 +11,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const username = getUsername();
   const [communityOpen, setCommunityOpen] = useState(false);
   const [meOpen, setMeOpen] = useState(false);
+  const [userLook, setUserLook] = useState("");
+
+  useEffect(() => {
+    if (loggedIn) {
+      apiGet("/api/auth/me").then((data) => {
+        if (data.look) setUserLook(data.look);
+      }).catch(() => {});
+    }
+  }, [loggedIn]);
 
   const handleLogout = () => {
     clearAuth();
@@ -189,23 +199,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
 
-              {/* Me Dropdown - moved after Store */}
+              {/* Me Dropdown - avatar + username like Fresh Hotel */}
               <li
                 className="relative"
                 onMouseEnter={() => setMeOpen(true)}
                 onMouseLeave={() => setMeOpen(false)}
               >
-                <Link
-                  to="/me"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                <button
+                  className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium transition-all ${
                     isActive("/me")
                       ? "bg-black/30 text-white"
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Me <span className="font-bold">{username}</span>
+                  {userLook && (
+                    <div className="w-7 h-7 rounded-full overflow-hidden bg-zinc-800 border border-zinc-600 flex items-center justify-center">
+                      <HabboAvatar look={userLook} size="small" />
+                    </div>
+                  )}
+                  <span className="font-bold">{username}</span>
                   <ChevronDown className="w-3 h-3 opacity-60" />
-                </Link>
+                </button>
                 {meOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
                     <li>

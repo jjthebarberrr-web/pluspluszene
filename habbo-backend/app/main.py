@@ -18,6 +18,7 @@ from app.routes.news_routes import router as news_router
 from app.routes.users_routes import router as users_router
 from app.routes.staff_routes import router as staff_router
 from app.routes.leaderboard_routes import router as leaderboard_router
+from app.routes.home_routes import router as home_router
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
@@ -44,6 +45,7 @@ app.include_router(news_router)
 app.include_router(users_router)
 app.include_router(staff_router)
 app.include_router(leaderboard_router)
+app.include_router(home_router)
 
 
 @app.get("/healthz")
