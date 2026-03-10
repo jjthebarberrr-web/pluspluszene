@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera, Upload, Image } from "lucide-react";
+import { Camera, Image } from "lucide-react";
 import { apiGet } from "../api";
 
 interface Photo {
@@ -36,10 +36,7 @@ export function PhotosPage() {
                 <p className="text-pink-200/70 text-sm mt-0.5">Share your best moments from the hotel</p>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-lg border border-white/20 transition-all">
-              <Upload className="w-4 h-4" />
-              Upload Photo
-            </button>
+            <span className="text-pink-200/50 text-xs">Take a photo in-game to share it here</span>
           </div>
         </div>
       </div>

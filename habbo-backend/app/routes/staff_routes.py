@@ -82,9 +82,9 @@ async def get_staff():
             except Exception:
                 pass
 
-            # Get all staff members (rank > 2, exclude Citizen)
+            # Get all staff members (rank 3-7, exclude Citizen and VIP ranks 8+)
             await cur.execute(
-                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` > 2 ORDER BY `rank` DESC, username ASC"
+                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` > 2 AND `rank` <= 7 ORDER BY `rank` DESC, username ASC"
             )
             staff_rows = await cur.fetchall()
 
