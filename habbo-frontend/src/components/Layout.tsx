@@ -18,7 +18,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const facts = [
     "Did you know: This website and theme was coded by JJ",
     "Did you know: You can elect the next staff member through community elections",
-    "Did you know: HabboRetro is powered by Nitro HTML5 & Arcturus Morningstar",
+    "Did you know: HabPlus is powered by Nitro HTML5 & Arcturus Morningstar",
     "Did you know: Check the Leaderboards to see the richest players",
     "Did you know: Visit the Store to get exclusive perks and items",
     "Did you know: The community elects the President and government officials",
@@ -68,7 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-full relative overflow-hidden" style={{background: '#0a0a0a', height: '140px'}}>
         <img
           src="https://images.habbo.com/web_images/defaults/lpromo_gen15_51.png"
-          alt="HabboRetro Banner"
+          alt="HabPlus Banner"
           className="absolute inset-0 w-full h-full object-cover"
           style={{imageRendering: 'pixelated'}}
         />
@@ -81,8 +81,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Gamepad2 className="w-7 h-7 text-white" />
             </div>
             <div>
-              <span className="text-3xl font-black text-white tracking-tight">HABBO</span>
-              <span className="text-3xl font-light text-purple-300">RETRO</span>
+                            <span className="text-3xl font-black text-white tracking-tight">HAB</span>
+                            <span className="text-3xl font-light text-purple-300">PLUS</span>
             </div>
           </Link>
         </div>
@@ -282,7 +282,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Gamepad2 className="w-5 h-5 text-purple-500" />
-              <span className="font-bold text-zinc-500">HabboRetro</span>
+              <span className="font-bold text-zinc-500">HabPlus</span>
             </div>
             <p className="text-xs text-zinc-600">
               Powered by Nitro HTML5 &amp; Arcturus Morningstar | Not affiliated with Sulake

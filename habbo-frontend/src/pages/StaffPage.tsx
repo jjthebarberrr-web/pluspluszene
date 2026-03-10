@@ -129,7 +129,7 @@ export function StaffPage() {
               <Building2 className="w-8 h-8 text-yellow-200" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">The Government of HabboRetro</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight">The Government of HabPlus</h1>
               <p className="text-yellow-200/70 text-sm mt-0.5">Elected by the people, serving the community</p>
             </div>
           </div>
@@ -253,7 +253,7 @@ export function StaffPage() {
               </div>
               <div className="bg-zinc-900 p-4 border border-zinc-800 border-t-0 space-y-3">
                 <p className="text-sm text-zinc-300 leading-relaxed">
-                  The <span className="text-amber-400 font-semibold">HabboRetro Government</span> is the backbone of our virtual world.
+                  The <span className="text-amber-400 font-semibold">HabPlus Government</span> is the backbone of our virtual world.
                   Our officials are elected by the community and entrusted with keeping the hotel safe, fun, and thriving for everyone.
                 </p>
                 <p className="text-xs text-zinc-500 leading-relaxed">
@@ -361,7 +361,7 @@ export function StaffPage() {
             </div>
             <div className="bg-zinc-900 p-5 border border-zinc-800 border-t-0">
               <p className="text-sm text-zinc-400 leading-relaxed">
-                In HabboRetro, the community has the power to elect their leaders. Every citizen can vote for candidates
+                In HabPlus, the community has the power to elect their leaders. Every citizen can vote for candidates
                 running for government positions. Elections are held regularly to fill open positions. Your vote matters — shape the future of our hotel.
               </p>
             </div>

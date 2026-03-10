@@ -79,7 +79,7 @@ async def init_db():
                 import time
                 now = int(time.time())
                 news_data = [
-                    ("Welcome to HabboRetro!", "We are excited to launch our brand new Habbo retro hotel! Join us for amazing events, rare furni, and a fantastic community. Register now and start your adventure!", "", "Admin", "announcement", now),
+                    ("Welcome to HabPlus!", "We are excited to launch our brand new Habbo retro hotel! Join us for amazing events, rare furni, and a fantastic community. Register now and start your adventure!", "", "Admin", "announcement", now),
                     ("Double Credits Weekend!", "This weekend all users will receive double credits! Log in and enjoy the bonus. Don't miss out on this amazing opportunity to furnish your rooms!", "", "Admin", "event", now - 86400),
                     ("New Rare Furni Released", "Check out the latest collection of rare furniture items now available in the catalog. Limited edition items won't last long!", "", "Admin", "update", now - 172800),
                     ("Staff Applications Open", "We are looking for dedicated staff members to join our team. If you think you have what it takes, apply now through the community page!", "", "Admin", "announcement", now - 259200),
@@ -95,7 +95,7 @@ async def init_db():
             row = await cur.fetchone()
             if row[0] == 0:
                 settings = [
-                    ("hotel_name", "HabboRetro"),
+                    ("hotel_name", "HabPlus"),
                     ("hotel_description", "The best Habbo retro experience"),
                     ("max_users_online", "0"),
                     ("users_online", "0"),

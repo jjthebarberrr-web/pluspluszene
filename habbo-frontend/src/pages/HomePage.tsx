@@ -276,7 +276,7 @@ export function HomePage() {
       <div className="lg:col-span-2">
         <div className="rounded overflow-hidden">
           <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-            Login to HabboRetro
+            Login to HabPlus
           </div>
           <div className="bg-zinc-900 p-6 border border-zinc-800 border-t-0">
             <form onSubmit={handleLogin} className="space-y-3">
@@ -331,7 +331,7 @@ export function HomePage() {
       <div className="space-y-4">
         <div className="rounded overflow-hidden">
           <div className="bg-gradient-to-r from-purple-700 to-purple-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-            About HabboRetro
+            About HabPlus
           </div>
           <div className="bg-zinc-900 p-5 border border-zinc-800 border-t-0">
             <div className="flex items-center gap-3 mb-4">
@@ -339,12 +339,12 @@ export function HomePage() {
                 <Gamepad2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-white">HabboRetro</h3>
+                <h3 className="font-bold text-white">HabPlus</h3>
                 <p className="text-xs text-zinc-500">Virtual World</p>
               </div>
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              Welcome to HabboRetro! Create your avatar, design your room, chat with friends, and explore our virtual world. Join thousands of players in the ultimate retro hotel experience.
+              Welcome to HabPlus! Create your avatar, design your room, chat with friends, and explore our virtual world. Join thousands of players in the ultimate retro hotel experience.
             </p>
           </div>
         </div>

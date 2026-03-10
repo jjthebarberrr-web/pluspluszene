@@ -28,7 +28,7 @@ export function LoginPage() {
     <div className="max-w-lg mx-auto">
       <div className="rounded overflow-hidden">
         <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-          Login to HabboRetro
+          Login to HabPlus
         </div>
         <div className="bg-zinc-900 p-6 border border-zinc-800 border-t-0">
           <form onSubmit={handleLogin} className="space-y-3">

@@ -73,7 +73,7 @@ export function ClientPage() {
         <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-sky-600 to-cyan-500">
           <div className="flex items-center gap-2">
             <Gamepad2 className="w-5 h-5 text-white" />
-            <span className="text-sm font-bold text-white">HabboRetro Hotel</span>
+            <span className="text-sm font-bold text-white">HabPlus Hotel</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
@@ -107,7 +107,7 @@ export function ClientPage() {
           className="w-full border-0"
           style={{ height: fullscreen ? "calc(100vh - 40px)" : "calc(100vh - 140px)" }}
           allow="autoplay; fullscreen; microphone"
-          title="HabboRetro Hotel Client"
+          title="HabPlus Hotel Client"
         />
       </div>
     );
@@ -120,7 +120,7 @@ export function ClientPage() {
       <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-sky-600 to-cyan-500 rounded-t-2xl">
         <div className="flex items-center gap-2">
           <Gamepad2 className="w-5 h-5 text-white" />
-          <span className="text-sm font-bold text-white">HabboRetro Hotel</span>
+          <span className="text-sm font-bold text-white">HabPlus Hotel</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">

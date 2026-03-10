@@ -36,7 +36,7 @@ export function OldStaffPage() {
         <div className="flex items-start gap-3">
           <Shield className="w-5 h-5 text-zinc-500 shrink-0 mt-0.5" />
           <p className="text-sm text-zinc-400 leading-relaxed">
-            These are the former officials who previously served in the HabboRetro Government. They dedicated their time and effort 
+            These are the former officials who previously served in the HabPlus Government. They dedicated their time and effort 
             to making our hotel a better place. We honor their service and contributions to our community.
           </p>
         </div>
