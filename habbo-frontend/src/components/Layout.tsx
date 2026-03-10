@@ -12,6 +12,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [communityOpen, setCommunityOpen] = useState(false);
   const [meOpen, setMeOpen] = useState(false);
   const [userLook, setUserLook] = useState("");
+  const [onlineCount, setOnlineCount] = useState(0);
 
   useEffect(() => {
     if (loggedIn) {
@@ -19,6 +20,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         if (data.look) setUserLook(data.look);
       }).catch(() => {});
     }
+    // Fetch online count
+    apiGet("/api/home").then((data) => {
+      if (data.online_count !== undefined) setOnlineCount(data.online_count);
+    }).catch(() => {});
   }, [loggedIn]);
 
   const handleLogout = () => {
@@ -60,25 +65,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
         </div>
-        {/* Right side buttons */}
+        {/* Online count on right */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
-          {loggedIn ? (
-            <>
-              <Link to="/client" className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded font-bold transition-all shadow-lg uppercase tracking-wide">Enter</Link>
-              <span className="text-xs text-zinc-200 bg-black/60 px-3 py-1.5 rounded font-medium">Online Now</span>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-2 bg-black/50 hover:bg-black/70 text-zinc-300 text-sm rounded border border-zinc-600 transition-all"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </>
-          ) : (
+          {!loggedIn ? (
             <>
               <Link to="/login" className="px-5 py-2 bg-zinc-800/80 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium">Login</Link>
               <span className="text-zinc-400 text-sm">or</span>
               <Link to="/register" className="px-5 py-2 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg">Register for free!</Link>
             </>
+          ) : (
+            <span className="text-sm text-zinc-200 bg-black/60 px-4 py-2 rounded font-bold">{onlineCount} ONLINE</span>
           )}
         </div>
       </div>
@@ -228,23 +224,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         Account Settings
                       </Link>
                     </li>
+                    <li className="border-t border-zinc-700">
+                      <button onClick={() => { setMeOpen(false); handleLogout(); }} className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-all">
+                        <span className="flex items-center gap-2"><LogOut className="w-3.5 h-3.5" /> Logout</span>
+                      </button>
+                    </li>
                   </ul>
                 )}
               </li>
 
-              {/* Enter Hotel - right aligned */}
-              <li className="ml-auto">
-                <Link
-                  to="/client"
-                  className="flex items-center gap-1.5 px-4 py-2.5 font-bold text-yellow-300 hover:bg-black/20 hover:text-yellow-200 transition-all border border-transparent hover:border-white/30"
-                >
-                  <Gamepad2 className="w-4 h-4" />
-                  Enter Hotel
-                </Link>
-              </li>
             </ul>
           </div>
         </nav>
+      )}
+
+      {/* Enter Hotel Bar - Below nav */}
+      {loggedIn && (
+        <div className="w-full" style={{background: 'linear-gradient(180deg, #1a3a1a 0%, #0d1f0d 100%)'}}>
+          <div className="max-w-6xl mx-auto px-4">
+            <Link
+              to="/client"
+              className="flex items-center justify-center gap-2 py-2.5 font-bold text-green-300 hover:text-white transition-all text-sm tracking-wide"
+            >
+              <Gamepad2 className="w-5 h-5" />
+              ENTER HOTEL
+            </Link>
+          </div>
+        </div>
       )}
 
       {/* Content */}
