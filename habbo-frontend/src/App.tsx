@@ -9,6 +9,11 @@ import { NewsPage } from "./pages/NewsPage";
 import { ClientPage } from "./pages/ClientPage";
 import { StaffPage } from "./pages/StaffPage";
 import { StorePage } from "./pages/StorePage";
+import { PhotosPage } from "./pages/PhotosPage";
+import { OldStaffPage } from "./pages/OldStaffPage";
+import { VIPListPage } from "./pages/VIPListPage";
+import { RareValuesPage } from "./pages/RareValuesPage";
+import { LeaderboardsPage } from "./pages/LeaderboardsPage";
 
 function App() {
   return (
@@ -25,6 +30,11 @@ function App() {
           <Route path="/news" element={<NewsPage />} />
           <Route path="/staff" element={<StaffPage />} />
           <Route path="/store" element={<StorePage />} />
+          <Route path="/photos" element={<PhotosPage />} />
+          <Route path="/old-staff" element={<OldStaffPage />} />
+          <Route path="/vip-list" element={<VIPListPage />} />
+          <Route path="/rare-values" element={<RareValuesPage />} />
+          <Route path="/leaderboards" element={<LeaderboardsPage />} />
           <Route path="/client" element={<ClientPage />} />
         </Routes>
       </Layout>

@@ -17,6 +17,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+  const isAnyCommunityActive = () =>
+    isActive("/community") || isActive("/photos") || isActive("/staff") ||
+    isActive("/old-staff") || isActive("/vip-list") || isActive("/rare-values");
 
   // Don't show layout chrome on client page
   if (location.pathname === "/client") {
@@ -83,7 +86,110 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <nav className="bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-800/50 shadow-lg relative z-50">
           <div className="max-w-6xl mx-auto px-4">
             <ul className="flex items-center gap-0">
-              {/* Me Dropdown */}
+              {/* Home */}
+              <li>
+                <Link
+                  to="/"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    location.pathname === "/"
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Home
+                </Link>
+              </li>
+
+              {/* News */}
+              <li>
+                <Link
+                  to="/news"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isActive("/news")
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  News
+                </Link>
+              </li>
+
+              {/* Community Dropdown */}
+              <li
+                className="relative"
+                onMouseEnter={() => setCommunityOpen(true)}
+                onMouseLeave={() => setCommunityOpen(false)}
+              >
+                <button
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isAnyCommunityActive()
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Community
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                </button>
+                {communityOpen && (
+                  <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-52 z-50">
+                    <li>
+                      <Link to="/photos" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Photos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/staff" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Hotel Staff
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/old-staff" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Old Staff
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/vip-list" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        VIP List
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/rare-values" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Rare Values
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+
+              {/* Leaderboards */}
+              <li>
+                <Link
+                  to="/leaderboards"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isActive("/leaderboards")
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Leaderboards
+                </Link>
+              </li>
+
+              {/* Store */}
+              <li>
+                <Link
+                  to="/store"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isActive("/store")
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Store
+                </Link>
+              </li>
+
+              {/* Me Dropdown - moved after Store */}
               <li
                 className="relative"
                 onMouseEnter={() => setMeOpen(true)}
@@ -103,88 +209,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {meOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
                     <li>
-                      <Link to="/me" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                      <Link to="/me" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
                         Home
                       </Link>
                     </li>
                     <li>
-                      <Link to="/me/page" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                      <Link to="/me/page" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
                         My Page
                       </Link>
                     </li>
                     <li>
-                      <Link to="/me/settings" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                      <Link to="/me/settings" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
                         Account Settings
                       </Link>
                     </li>
                   </ul>
                 )}
-              </li>
-
-              {/* Community Dropdown */}
-              <li
-                className="relative"
-                onMouseEnter={() => setCommunityOpen(true)}
-                onMouseLeave={() => setCommunityOpen(false)}
-              >
-                <Link
-                  to="/community"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
-                    isActive("/community")
-                      ? "bg-black/30 text-white"
-                      : "text-red-100 hover:bg-black/20 hover:text-white"
-                  }`}
-                >
-                  Community
-                  <ChevronDown className="w-3 h-3 opacity-60" />
-                </Link>
-                {communityOpen && (
-                  <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
-                    <li>
-                      <Link to="/community" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        Posts
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/community/photos" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        Photos
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/staff" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        Hotel Staff
-                      </Link>
-                    </li>
-                  </ul>
-                )}
-              </li>
-
-              {/* Staff */}
-              <li>
-                <Link
-                  to="/staff"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
-                    isActive("/staff")
-                      ? "bg-black/30 text-white"
-                      : "text-red-100 hover:bg-black/20 hover:text-white"
-                  }`}
-                >
-                  Staff
-                </Link>
-              </li>
-
-              {/* Store */}
-              <li>
-                <Link
-                  to="/store"
-                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
-                    isActive("/store")
-                      ? "bg-black/30 text-white"
-                      : "text-red-100 hover:bg-black/20 hover:text-white"
-                  }`}
-                >
-                  Store
-                </Link>
               </li>
 
               {/* Enter Hotel - right aligned */}
