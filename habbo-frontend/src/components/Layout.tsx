@@ -38,58 +38,50 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-black text-white" style={{ fontFamily: "'Roboto', sans-serif" }}>
-      {/* Header */}
-      <header className="bg-zinc-950 border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
+      {/* Top Banner Image - Like Fresh Hotel */}
+      <div className="w-full relative" style={{background: '#0a0a0a'}}>
+        <div className="max-w-6xl mx-auto relative" style={{height: '120px'}}>
+          <img
+            src="https://images.habbo.com/web_images/defaults/lpromo_gen15_51.png"
+            alt="HabboRetro Banner"
+            className="absolute right-0 top-0 h-full"
+            style={{imageRendering: 'pixelated', objectFit: 'contain'}}
+          />
+          {/* Logo on left */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-teal-400 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
                 <Gamepad2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <span className="text-xl font-black text-white tracking-tight">HABBO</span>
-                <span className="text-xl font-light text-purple-300">RETRO</span>
+                <span className="text-2xl font-black text-white tracking-tight">HABBO</span>
+                <span className="text-2xl font-light text-purple-300">RETRO</span>
               </div>
             </Link>
-
-            {/* Header Right - Auth Buttons or User Info */}
-            <div className="flex items-center gap-3">
-              {loggedIn ? (
-                <>
-                  <span className="text-sm text-zinc-400 hidden sm:block">
-                    Welcome, <strong className="text-white">{username}</strong>
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded border border-zinc-700 transition-all"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden sm:inline">Logout</span>
-                  </button>
-                </>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-zinc-400 hidden md:block">Join our community and make new friends</span>
-                  <Link
-                    to="/login"
-                    className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium"
-                  >
-                    Login
-                  </Link>
-                  <span className="text-zinc-600 text-sm">or</span>
-                  <Link
-                    to="/register"
-                    className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg shadow-purple-500/20"
-                  >
-                    Register for free!
-                  </Link>
-                </div>
-              )}
-            </div>
+          </div>
+          {/* Right side buttons */}
+          <div className="absolute right-4 top-4 flex items-center gap-3">
+            {loggedIn ? (
+              <>
+                <Link to="/client" className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded font-bold transition-all shadow-lg uppercase tracking-wide">Enter</Link>
+                <span className="text-xs text-zinc-300 bg-black/60 px-3 py-1.5 rounded font-medium">Online Now</span>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-sm rounded border border-zinc-700 transition-all"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium">Login</Link>
+                <span className="text-zinc-500 text-sm">or</span>
+                <Link to="/register" className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg">Register for free!</Link>
+              </>
+            )}
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Navigation Bar - Only show when logged in */}
       {loggedIn && (
