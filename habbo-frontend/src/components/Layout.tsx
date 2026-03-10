@@ -238,18 +238,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </nav>
       )}
 
-      {/* Enter Hotel Bar - Below nav */}
+      {/* Enter Hotel Bar - Below nav with townhall image */}
       {loggedIn && (
-        <div className="w-full" style={{background: 'linear-gradient(180deg, #1a3a1a 0%, #0d1f0d 100%)'}}>
-          <div className="max-w-6xl mx-auto px-4">
-            <Link
-              to="/client"
-              className="flex items-center justify-center gap-2 py-2.5 font-bold text-green-300 hover:text-white transition-all text-sm tracking-wide"
-            >
-              <Gamepad2 className="w-5 h-5" />
-              ENTER HOTEL
-            </Link>
-          </div>
+        <div className="w-full relative overflow-hidden" style={{height: '80px'}}>
+          <img
+            src="https://images.habbo.com/web_images/habbo-web-articles/lpromo_townhall_sep25.png"
+            alt="Enter Hotel"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{imageRendering: 'pixelated'}}
+          />
+          <div className="absolute inset-0 bg-black/40" />
+          <Link
+            to="/client"
+            className="absolute inset-0 flex items-center justify-center gap-2 font-bold text-white hover:text-yellow-300 transition-all text-lg tracking-wide z-10"
+          >
+            <Gamepad2 className="w-6 h-6" />
+            ENTER HOTEL
+          </Link>
         </div>
       )}
 

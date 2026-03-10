@@ -106,49 +106,33 @@ export function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Room Preview / Welcome Banner */}
-          <div className="rounded overflow-hidden">
-            <div className="relative bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
-              <div className="h-52 relative overflow-hidden" style={{background: '#1a1a1a'}}>
-                <img
-                  src="https://images.habbo.com/web_images/habbo-web-articles/lpromo_townhall_sep25.png"
-                  alt="Hotel Scene"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{imageRendering: 'pixelated'}}
-                />
-                {/* User avatar overlay */}
+          {/* Currency Bar */}
+          {profile && (
+            <div className="rounded overflow-hidden">
+              <div className="flex items-center gap-4 px-4 py-2.5 bg-zinc-900 border border-zinc-700 text-sm">
                 {profile && userLook && (
-                  <div className="absolute bottom-0 left-6 z-10">
-                    <HabboAvatar look={userLook} size="large" direction={2} />
+                  <div className="w-10 h-12 relative overflow-hidden flex-shrink-0" style={{imageRendering: 'pixelated'}}>
+                    <HabboAvatar look={userLook} size="small" />
                   </div>
                 )}
-                {/* Hotel name overlay */}
-                <div className="absolute top-3 right-4 z-10 bg-black/60 backdrop-blur-sm px-4 py-1.5 rounded">
-                  <span className="text-white font-black text-sm tracking-wide">HABBORETRO</span>
-                </div>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-yellow-400" />
+                  <span className="text-yellow-400 font-bold">{profile.credits.toLocaleString()}</span>
+                  <span className="text-zinc-500">Credits</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-purple-400" />
+                  <span className="text-purple-400 font-bold">{profile.pixels.toLocaleString()}</span>
+                  <span className="text-zinc-500">Duckets</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-sky-400" />
+                  <span className="text-sky-400 font-bold">{profile.diamonds.toLocaleString()}</span>
+                  <span className="text-zinc-500">Diamonds</span>
+                </span>
               </div>
-              {/* Currency Bar */}
-              {profile && (
-                <div className="flex items-center gap-4 px-4 py-2.5 bg-black/60 border-t border-zinc-700 text-sm">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                    <span className="text-yellow-400 font-bold">{profile.credits.toLocaleString()}</span>
-                    <span className="text-zinc-500">Credits</span>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-purple-400" />
-                    <span className="text-purple-400 font-bold">{profile.pixels.toLocaleString()}</span>
-                    <span className="text-zinc-500">Duckets</span>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-sky-400" />
-                    <span className="text-sky-400 font-bold">{profile.diamonds.toLocaleString()}</span>
-                    <span className="text-zinc-500">Diamonds</span>
-                  </span>
-                </div>
-              )}
             </div>
-          </div>
+          )}
 
           {/* Popular Rooms */}
           <div className="rounded overflow-hidden">
