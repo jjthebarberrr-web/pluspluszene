@@ -66,19 +66,37 @@ def get_http_client():
 async def proxy_assets(asset_path: str):
     # Serve local c_images files first (downloaded asset pack)
     if asset_path.startswith("c_images/"):
-        local_file = LOCAL_C_IMAGES_DIR / asset_path[len("c_images/"):]
+        sub_path = asset_path[len("c_images/"):]
+        local_file = LOCAL_C_IMAGES_DIR / sub_path
         if local_file.is_file():
             return FileResponse(
                 str(local_file),
                 headers={"Cache-Control": "public, max-age=86400"},
             )
-        # Try multiple CDNs as fallback
+        # Try alternate extensions (.gif <-> .png) for local files
+        alt_file = None
+        if sub_path.endswith(".gif"):
+            alt_file = LOCAL_C_IMAGES_DIR / sub_path.replace(".gif", ".png")
+        elif sub_path.endswith(".png"):
+            alt_file = LOCAL_C_IMAGES_DIR / sub_path.replace(".png", ".gif")
+        if alt_file and alt_file.is_file():
+            return FileResponse(
+                str(alt_file),
+                headers={"Cache-Control": "public, max-age=86400"},
+            )
+        # Try multiple CDNs as fallback and cache locally
         client = get_http_client()
         for cdn_base in C_IMAGES_CDNS:
             try:
                 resp = await client.get(f"{cdn_base}/{asset_path}")
                 if resp.status_code == 200:
                     content_type = resp.headers.get("content-type", "application/octet-stream")
+                    # Cache downloaded file locally for future requests
+                    try:
+                        local_file.parent.mkdir(parents=True, exist_ok=True)
+                        local_file.write_bytes(resp.content)
+                    except Exception:
+                        pass
                     return Response(
                         content=resp.content,
                         status_code=200,
