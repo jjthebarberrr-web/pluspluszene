@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiGet } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
-import { Trophy, Medal, Coins, Clock, Users, Star } from "lucide-react";
 
 interface LeaderboardUser {
   id: number;
@@ -14,146 +13,140 @@ interface LeaderboardUser {
   account_created: number;
 }
 
+interface AllBoards {
+  richest: LeaderboardUser[];
+  most_pixels: LeaderboardUser[];
+  online_now: LeaderboardUser[];
+  oldest: LeaderboardUser[];
+}
+
+const boardConfig: { key: keyof AllBoards; label: string; emoji: string; color: string; gradient: string; getValue: (u: LeaderboardUser) => string }[] = [
+  { key: "richest", label: "Richest", emoji: "\u{1F4B0}", color: "#E8A820", gradient: "linear-gradient(135deg, #E8A820, #1a1a1a)", getValue: (u) => `${u.credits.toLocaleString()} credits` },
+  { key: "most_pixels", label: "Most Pixels", emoji: "\u{2B50}", color: "#5CB565", gradient: "linear-gradient(135deg, #5CB565, #1a1a1a)", getValue: (u) => `${u.pixels.toLocaleString()} pixels` },
+  { key: "online_now", label: "Online Now", emoji: "\u{1F7E2}", color: "#1e7295", gradient: "linear-gradient(135deg, #1e7295, #1a1a1a)", getValue: (u) => u.online ? "Online" : "Offline" },
+  { key: "oldest", label: "Oldest Accounts", emoji: "\u{23F3}", color: "#5C229E", gradient: "linear-gradient(135deg, #5C229E, #1a1a1a)", getValue: (u) => { const d = new Date(u.account_created * 1000); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } },
+];
+
 export function LeaderboardsPage() {
-  const [users, setUsers] = useState<LeaderboardUser[]>([]);
+  const [boards, setBoards] = useState<AllBoards | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeBoard, setActiveBoard] = useState("credits");
 
   useEffect(() => {
-    loadLeaderboard();
-  }, [activeBoard]);
+    loadAll();
+  }, []);
 
-  const loadLeaderboard = async () => {
+  const loadAll = async () => {
     setLoading(true);
     try {
-      const data = await apiGet(`/api/leaderboards?sort=${activeBoard}`);
-      setUsers(data.users || []);
+      const data = await apiGet("/api/leaderboards/all");
+      setBoards(data);
     } catch {
-      setUsers([]);
+      setBoards(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const boards = [
-    { key: "credits", label: "Richest", icon: <Coins className="w-4 h-4" /> },
-    { key: "pixels", label: "Most Pixels", icon: <Star className="w-4 h-4" /> },
-    { key: "online", label: "Online Now", icon: <Users className="w-4 h-4" /> },
-    { key: "oldest", label: "Oldest Accounts", icon: <Clock className="w-4 h-4" /> },
-  ];
-
-  const getMedalColor = (index: number) => {
-    if (index === 0) return "text-yellow-400";
-    if (index === 1) return "text-zinc-300";
-    if (index === 2) return "text-orange-400";
-    return "text-zinc-600";
+  const getMedalStyle = (idx: number): React.CSSProperties => {
+    if (idx === 0) return { background: "linear-gradient(135deg, #FFD700, #B8860B)", color: "#fff", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #FFD700", boxShadow: "0 0 6px rgba(255,215,0,0.4)" };
+    if (idx === 1) return { background: "linear-gradient(135deg, #C0C0C0, #808080)", color: "#fff", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #C0C0C0" };
+    if (idx === 2) return { background: "linear-gradient(135deg, #CD7F32, #8B4513)", color: "#fff", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #CD7F32" };
+    return { background: "#222", color: "#666", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #333" };
   };
 
-  const getMedalBg = (index: number) => {
-    if (index === 0) return "bg-yellow-900/30 border-yellow-700/30";
-    if (index === 1) return "bg-zinc-700/30 border-zinc-600/30";
-    if (index === 2) return "bg-orange-900/30 border-orange-700/30";
-    return "bg-zinc-800/50 border-zinc-700/30";
-  };
-
-  const getValue = (user: LeaderboardUser) => {
-    if (activeBoard === "credits") return `${user.credits.toLocaleString()} credits`;
-    if (activeBoard === "pixels") return `${user.pixels.toLocaleString()} pixels`;
-    if (activeBoard === "online") return user.online ? "Online" : "Offline";
-    if (activeBoard === "oldest") return new Date(user.account_created * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    return "";
-  };
+  if (loading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 0" }}>
+        <div style={{ width: "40px", height: "40px", border: "4px solid #5C229E", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div style={{ maxWidth: "1100px", margin: "0 auto", fontFamily: "'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       {/* Header */}
-      <div className="rounded-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-700 via-purple-600 to-indigo-700 px-6 py-5">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-black/20 rounded-xl flex items-center justify-center border border-white/10">
-              <Trophy className="w-8 h-8 text-yellow-300" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Leaderboards</h1>
-              <p className="text-purple-200/70 text-sm mt-0.5">See who's on top of the hotel</p>
-            </div>
-          </div>
+      <div style={{
+        background: "linear-gradient(135deg, #5C229E, #1a1a1a)",
+        borderRadius: "8px",
+        padding: "16px 20px",
+        marginBottom: "16px",
+        border: "1px solid #2a2a2a",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+      }}>
+        <span style={{ fontSize: "28px" }}>&#x1F3C6;</span>
+        <div>
+          <h1 style={{ fontSize: "18px", fontWeight: "bold", color: "#fff", margin: 0 }}>Leaderboards</h1>
+          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", margin: 0 }}>See who's on top of the hotel</p>
         </div>
       </div>
 
-      {/* Board Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {boards.map((board) => (
-          <button
-            key={board.key}
-            onClick={() => setActiveBoard(board.key)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all ${
-              activeBoard === board.key
-                ? "bg-gradient-to-r from-indigo-600 to-purple-500 text-white shadow-lg shadow-purple-500/20"
-                : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
-            }`}
-          >
-            {board.icon}
-            {board.label}
-          </button>
-        ))}
-      </div>
+      {/* 4 Columns */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+        {boardConfig.map((cfg) => {
+          const users = boards ? (boards[cfg.key] || []) : [];
+          return (
+            <div key={cfg.key} style={{ background: "#1a1a1a", borderRadius: "8px", overflow: "hidden", border: "1px solid #2a2a2a" }}>
+              {/* Column Header */}
+              <div style={{
+                background: cfg.gradient,
+                padding: "10px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                borderBottom: "1px solid #333",
+              }}>
+                <span style={{ fontSize: "16px" }}>{cfg.emoji}</span>
+                <span style={{ fontWeight: "bold", color: "#fff", fontSize: "13px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{cfg.label}</span>
+              </div>
 
-      {/* Leaderboard */}
-      {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : users.length > 0 ? (
-        <div className="space-y-2">
-          {users.map((user, idx) => (
-            <div
-              key={user.id}
-              className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
-                idx < 3
-                  ? `${getMedalBg(idx)} hover:border-zinc-600`
-                  : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
-              }`}
-            >
-              {/* Rank */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${getMedalBg(idx)}`}>
-                {idx < 3 ? (
-                  <Medal className={`w-5 h-5 ${getMedalColor(idx)}`} />
+              {/* User List */}
+              <div style={{ padding: "0" }}>
+                {users.length === 0 ? (
+                  <div style={{ padding: "24px 12px", textAlign: "center", color: "#555", fontSize: "12px" }}>
+                    No users yet
+                  </div>
                 ) : (
-                  <span className="text-xs font-bold text-zinc-500">{idx + 1}</span>
+                  users.map((user, idx) => (
+                    <div
+                      key={user.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "6px 10px",
+                        borderBottom: idx < users.length - 1 ? "1px solid #222" : "none",
+                        background: idx === 0 ? "rgba(255,215,0,0.05)" : idx === 1 ? "rgba(192,192,192,0.03)" : idx === 2 ? "rgba(205,127,50,0.03)" : "transparent",
+                        transition: "background 0.15s",
+                        cursor: "default",
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#222"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = idx === 0 ? "rgba(255,215,0,0.05)" : idx === 1 ? "rgba(192,192,192,0.03)" : idx === 2 ? "rgba(205,127,50,0.03)" : "transparent"; }}
+                    >
+                      {/* Medal/Rank */}
+                      <div style={getMedalStyle(idx)}>
+                        {idx + 1}
+                      </div>
+
+                      {/* Avatar */}
+                      <div style={{ width: "32px", height: "32px", overflow: "hidden", borderRadius: "4px", background: "#111", border: "1px solid #333", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <HabboAvatar look={user.look} size="small" direction={2} />
+                      </div>
+
+                      {/* Name + Value */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: "12px", fontWeight: "600", color: "#ddd", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{user.username}</div>
+                        <div style={{ fontSize: "10px", color: cfg.color, fontWeight: "500" }}>{cfg.getValue(user)}</div>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
-
-              {/* Avatar */}
-              <div className="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center overflow-hidden border border-zinc-700 shrink-0">
-                <HabboAvatar look={user.look} size="medium" />
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-white text-sm">{user.username}</div>
-                <div className="text-xs text-zinc-500 truncate italic">&quot;{user.motto || "No motto"}&quot;</div>
-              </div>
-
-              {/* Value */}
-              <div className="text-right shrink-0">
-                <div className={`text-sm font-bold ${idx === 0 ? "text-yellow-400" : idx === 1 ? "text-zinc-300" : idx === 2 ? "text-orange-400" : "text-zinc-400"}`}>
-                  {getValue(user)}
-                </div>
-                <div className="text-[10px] text-zinc-600 uppercase tracking-wider">#{idx + 1}</div>
-              </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-12 text-center">
-          <div className="w-16 h-16 bg-zinc-800 rounded-xl flex items-center justify-center mx-auto mb-4 border border-zinc-700">
-            <Trophy className="w-8 h-8 text-zinc-600" />
-          </div>
-          <h3 className="text-lg font-bold text-zinc-400">No Data Yet</h3>
-          <p className="text-sm text-zinc-500 mt-1">Leaderboard data will appear as more users join the hotel.</p>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
