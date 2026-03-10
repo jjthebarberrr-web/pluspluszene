@@ -108,7 +108,7 @@ export function HomePage() {
               <div className="h-48 bg-gradient-to-br from-purple-900/40 via-zinc-900 to-teal-900/30 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10" style={{backgroundImage: "url('https://images.habbo.com/c_images/web_promo/lpromo_HabboWay2.png')", backgroundSize: "cover", backgroundPosition: "center"}} />
                 <div className="relative z-10 text-center">
-                  <h2 className="text-2xl font-black text-white tracking-tight">Welcome to <span className="text-purple-400">Fresh</span> Hotel</h2>
+                  <h2 className="text-2xl font-black text-white tracking-tight">Welcome to <span className="text-purple-400">HabboRetro</span></h2>
                   <p className="text-zinc-400 text-sm mt-1">Create, explore, and connect with friends</p>
                 </div>
               </div>
@@ -222,7 +222,7 @@ export function HomePage() {
           {/* Fresh of the Week */}
           <div className="rounded overflow-hidden">
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-white font-bold text-sm text-center tracking-wide">
-              Fresh of the Week
+              Player of the Week
             </div>
             <div className="bg-zinc-900 border border-zinc-800 border-t-0 p-4">
               {homeData?.user_of_week ? (
@@ -253,7 +253,7 @@ export function HomePage() {
       <div className="lg:col-span-2">
         <div className="rounded overflow-hidden">
           <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-            Login to Fresh Hotel
+            Login to HabboRetro
           </div>
           <div className="bg-zinc-900 p-6 border border-zinc-800 border-t-0">
             <form onSubmit={handleLogin} className="space-y-3">
@@ -308,7 +308,7 @@ export function HomePage() {
       <div className="space-y-4">
         <div className="rounded overflow-hidden">
           <div className="bg-gradient-to-r from-purple-700 to-purple-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
-            About Fresh Hotel
+            About HabboRetro
           </div>
           <div className="bg-zinc-900 p-5 border border-zinc-800 border-t-0">
             <div className="flex items-center gap-3 mb-4">
@@ -316,12 +316,12 @@ export function HomePage() {
                 <Gamepad2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-white">Fresh Hotel</h3>
+                <h3 className="font-bold text-white">HabboRetro</h3>
                 <p className="text-xs text-zinc-500">Virtual World</p>
               </div>
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              Welcome to Fresh Hotel! Create your avatar, design your room, chat with friends, and explore our virtual world. Join thousands of players in the ultimate retro hotel experience.
+              Welcome to HabboRetro! Create your avatar, design your room, chat with friends, and explore our virtual world. Join thousands of players in the ultimate retro hotel experience.
             </p>
           </div>
         </div>
