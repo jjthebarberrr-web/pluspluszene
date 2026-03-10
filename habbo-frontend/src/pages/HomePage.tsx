@@ -113,7 +113,7 @@ export function HomePage() {
                 <img
                   src="https://images.habbo.com/web_images/habbo-web-articles/lpromo_townhall_sep25.png"
                   alt="Hotel Scene"
-                  className="absolute inset-0 w-full h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-cover"
                   style={{imageRendering: 'pixelated'}}
                 />
                 {/* User avatar overlay */}
