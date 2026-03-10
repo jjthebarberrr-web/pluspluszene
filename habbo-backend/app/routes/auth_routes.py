@@ -60,6 +60,12 @@ async def register(req: RegisterRequest, db=Depends(get_db)):
     )
     user_id = cur.lastrowid
 
+    # Give starting duckets (type 0) and diamonds (type 5) in users_currency
+    await cur.execute(
+        "INSERT INTO users_currency (user_id, type, amount) VALUES (%s, 0, 200), (%s, 5, 10)",
+        (user_id, user_id)
+    )
+
     # Give default badge
     await cur.execute(
         "INSERT INTO users_badges (user_id, badge_code, slot_id) VALUES (%s, %s, %s)",
@@ -104,9 +110,11 @@ async def get_me(request: Request, db=Depends(get_db)):
         raise HTTPException(401, "Invalid or expired token")
 
     await cur.execute(
-        """SELECT id, username, mail, motto, look, credits, pixels, points,
-                  `rank`, online, gender, account_created, last_login, last_online, home_room
-           FROM users WHERE id = %s""",
+        """SELECT u.id, u.username, u.mail, u.motto, u.look, u.credits, u.pixels,
+                  COALESCE(uc.amount, 0) as diamonds,
+                  u.`rank`, u.online, u.gender, u.account_created, u.last_login, u.last_online, u.home_room
+           FROM users u LEFT JOIN users_currency uc ON u.id = uc.user_id AND uc.type = 5
+           WHERE u.id = %s""",
         (payload["user_id"],)
     )
     row = await cur.fetchone()
@@ -127,7 +135,7 @@ async def get_me(request: Request, db=Depends(get_db)):
         "look": row["look"],
         "credits": row["credits"],
         "pixels": row["pixels"],
-        "diamonds": row["points"],
+        "diamonds": row["diamonds"],
         "rank": row["rank"],
         "online": row["online"],
         "gender": row["gender"],
