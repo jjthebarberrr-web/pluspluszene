@@ -118,9 +118,9 @@ export function HomePage() {
                 />
                 {/* User avatar overlay */}
                 {profile && userLook && (
-                  <div className="absolute bottom-0 left-6 z-10">
-                    <HabboAvatar look={userLook} size="large" direction={2} />
-                  </div>
+                    <div className="absolute bottom-0 left-6 z-10" style={{filter: 'drop-shadow(0 0 1px white) drop-shadow(0 0 1px white) drop-shadow(0 0 0.5px white)'}}>
+                      <HabboAvatar look={userLook} size="large" direction={2} action="wav" />
+                    </div>
                 )}
                 {/* Enter Hotel button - centered right */}
                 <Link to="/client" className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-green-600 hover:bg-green-700 px-6 py-2.5 rounded font-bold text-white text-sm tracking-wide transition-all shadow-lg uppercase">

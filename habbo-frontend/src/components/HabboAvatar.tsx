@@ -3,13 +3,17 @@ interface HabboAvatarProps {
   size?: "small" | "medium" | "large";
   direction?: number;
   className?: string;
+  action?: string;
+  headOnly?: boolean;
 }
 
-export function HabboAvatar({ look, size = "medium", direction = 2, className = "" }: HabboAvatarProps) {
+export function HabboAvatar({ look, size = "medium", direction = 2, className = "", action = "", headOnly = false }: HabboAvatarProps) {
   const sizeMap = { small: "s", medium: "m", large: "l" };
   const pixelSize = { small: 36, medium: 64, large: 110 };
   const s = sizeMap[size];
-  const url = `https://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=${direction}&head_direction=${direction}&size=${s}&gesture=sml`;
+  let url = `https://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=${direction}&head_direction=${direction}&size=${s}&gesture=sml`;
+  if (action) url += `&action=${action}`;
+  if (headOnly) url += `&headonly=1`;
 
   return (
     <img

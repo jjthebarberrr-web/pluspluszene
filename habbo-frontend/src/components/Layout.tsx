@@ -233,7 +233,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 >
                   {userLook && (
                     <div className="w-7 h-7 rounded-full overflow-hidden bg-zinc-800 border border-zinc-600 flex items-center justify-center">
-                      <HabboAvatar look={userLook} size="small" />
+                      <HabboAvatar look={userLook} size="small" headOnly={true} />
                     </div>
                   )}
                   <span className="font-bold">{username}</span>
