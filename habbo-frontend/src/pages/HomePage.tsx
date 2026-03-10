@@ -122,8 +122,8 @@ export function HomePage() {
                     <HabboAvatar look={userLook} size="large" direction={2} />
                   </div>
                 )}
-                {/* Enter Hotel button */}
-                <Link to="/client" className="absolute top-3 right-4 z-10 bg-green-600 hover:bg-green-700 px-5 py-2 rounded font-bold text-white text-sm tracking-wide transition-all shadow-lg uppercase">
+                {/* Enter Hotel button - centered right */}
+                <Link to="/client" className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-green-600 hover:bg-green-700 px-6 py-2.5 rounded font-bold text-white text-sm tracking-wide transition-all shadow-lg uppercase">
                   Enter Hotel
                 </Link>
                 {/* Hotel name overlay */}
@@ -135,17 +135,17 @@ export function HomePage() {
               {profile && (
                 <div className="flex items-center gap-4 px-4 py-2.5 bg-black/60 border-t border-zinc-700 text-sm">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-yellow-400" />
+                    <img src="https://fresh-hotel.org/assets/images/hotel/purses/credits-icon.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                     <span className="text-yellow-400 font-bold">{profile.credits.toLocaleString()}</span>
                     <span className="text-zinc-500">Credits</span>
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-purple-400" />
+                    <img src="https://fresh-hotel.org/nitro-assets-new/images/wallet/0.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                     <span className="text-purple-400 font-bold">{profile.pixels.toLocaleString()}</span>
                     <span className="text-zinc-500">Duckets</span>
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-sky-400" />
+                    <img src="https://fresh-hotel.org//nitro-assets-new/images/wallet/5.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                     <span className="text-sky-400 font-bold">{profile.diamonds.toLocaleString()}</span>
                     <span className="text-zinc-500">Diamonds</span>
                   </span>

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { isLoggedIn, getUsername, clearAuth, apiGet } from "../api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { LogOut, ChevronDown, Gamepad2 } from "lucide-react";
 import { HabboAvatar } from "./HabboAvatar";
 
@@ -13,6 +13,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [meOpen, setMeOpen] = useState(false);
   const [userLook, setUserLook] = useState("");
   const [onlineCount, setOnlineCount] = useState(0);
+  const [factIndex, setFactIndex] = useState(0);
+
+  const facts = [
+    "Did you know: This website and theme was coded by JJ",
+    "Did you know: You can elect the next staff member through community elections",
+    "Did you know: HabboRetro is powered by Nitro HTML5 & Arcturus Morningstar",
+    "Did you know: Check the Leaderboards to see the richest players",
+    "Did you know: Visit the Store to get exclusive perks and items",
+    "Did you know: The community elects the President and government officials",
+    "Did you know: You can customize your avatar and room in the hotel",
+    "Did you know: Join the community and make new friends today",
+  ];
+
+  const rotateFact = useCallback(() => {
+    setFactIndex((prev) => (prev + 1) % facts.length);
+  }, [facts.length]);
+
+  useEffect(() => {
+    const interval = setInterval(rotateFact, 5000);
+    return () => clearInterval(interval);
+  }, [rotateFact]);
 
   useEffect(() => {
     if (loggedIn) {
@@ -76,6 +97,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           ) : (
             <span className="text-sm text-zinc-200 bg-black/60 px-4 py-2 rounded font-bold">{onlineCount} ONLINE</span>
           )}
+        </div>
+      </div>
+
+      {/* Scrolling Facts Marquee - Above nav */}
+      <div className="w-full overflow-hidden" style={{background: 'linear-gradient(180deg, #1a0505 0%, #0d0202 100%)', borderBottom: '1px solid #3a0a0a'}}>
+        <div className="max-w-6xl mx-auto px-4 py-1.5 flex items-center justify-center">
+          <span className="text-xs text-yellow-300/90 font-medium tracking-wide text-center transition-opacity duration-500" style={{fontFamily: "'Ubuntu', sans-serif"}}>
+            {facts[factIndex]}
+          </span>
         </div>
       </div>
 
