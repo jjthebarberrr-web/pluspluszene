@@ -9,6 +9,7 @@ interface VipTier {
   color: string;
   borderColor: string;
   bgGradient: string;
+  badgeImage: string;
   price: number;
   currency: "usd";
   perks: string[];
@@ -20,6 +21,7 @@ const vipTiers: VipTier[] = [
   {
     id: 1, rank: 2, name: "VIP Bronze", badge: "VIP1", color: "#CD7F32",
     borderColor: "border-amber-700", bgGradient: "from-amber-900 to-amber-700",
+    badgeImage: "/badges/vip_bronze.png",
     price: 4.99, currency: "usd",
     perks: ["VIP Bronze badge", "Access to VIP Bronze catalog", "30 exclusive bonus rares", "VIP chat prefix", "Priority room access"],
     exclusiveItems: "Bonus Rares, Mini Rares, Limited Editions",
@@ -27,6 +29,7 @@ const vipTiers: VipTier[] = [
   {
     id: 2, rank: 3, name: "VIP Silver", badge: "VIP2", color: "#C0C0C0",
     borderColor: "border-zinc-400", bgGradient: "from-zinc-600 to-zinc-400",
+    badgeImage: "/badges/vip_silver.png",
     price: 9.99, currency: "usd", popular: true,
     perks: ["VIP Silver badge", "Access to Bronze + Silver catalog", "30 premium rares", "Name change command", "Fast walk & moonwalk", "VIP chat prefix"],
     exclusiveItems: "Rainbow LTDs, Premium Bonus Rares",
@@ -34,6 +37,7 @@ const vipTiers: VipTier[] = [
   {
     id: 3, rank: 4, name: "VIP Gold", badge: "VIP3", color: "#FFD700",
     borderColor: "border-yellow-500", bgGradient: "from-yellow-700 to-yellow-500",
+    badgeImage: "/badges/vip_gold.png",
     price: 19.99, currency: "usd",
     perks: ["VIP Gold badge", "Access to Bronze + Silver + Gold catalog", "40 ultra rare items", "Mimic command", "Teleport command", "All Silver perks included"],
     exclusiveItems: "Diamond Furni, NFT Rares, Ultra Bonus Rares",
@@ -41,6 +45,7 @@ const vipTiers: VipTier[] = [
   {
     id: 4, rank: 5, name: "VIP Diamond", badge: "VIP4", color: "#B9F2FF",
     borderColor: "border-sky-300", bgGradient: "from-sky-600 to-sky-300",
+    badgeImage: "/badges/vip_diamond.png",
     price: 29.99, currency: "usd", popular: true,
     perks: ["VIP Diamond badge", "Access to ALL VIP catalogs", "50 most exclusive rares", "Dance all command", "Faceless mode", "Enter full rooms", "Enter any room", "All Gold perks included"],
     exclusiveItems: "HabPlus 25th Anniversary, Ultra LTDs, Legendary Rares",
@@ -113,9 +118,7 @@ export function StorePage() {
               <div key={tier.id} className={`rounded overflow-hidden relative border ${tier.borderColor}`}>
                 {tier.popular && <div className="absolute top-2 right-2 z-10 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded">BEST VALUE</div>}
                 <div className={`bg-gradient-to-r ${tier.bgGradient} px-4 py-3 flex items-center gap-3`}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg" style={{ backgroundColor: tier.color, border: "2px solid rgba(255,255,255,0.3)" }}>
-                    {tier.badge.replace("VIP", "")}
-                  </div>
+                  <img src={tier.badgeImage} alt={tier.name} className="w-12 h-12 object-contain drop-shadow-lg" />
                   <div>
                     <div className="text-white font-bold text-sm">{tier.name}</div>
                     <div className="text-white/70 text-xs">Rank {tier.rank}</div>
