@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiPost, setAuth } from "../api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { LogIn, Gamepad2, AlertCircle } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -30,73 +25,57 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-sky-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-sky-500/20">
-            <Gamepad2 className="w-8 h-8 text-sky-400" />
-          </div>
-          <h1 className="text-2xl font-bold text-zinc-100">Welcome Back</h1>
-          <p className="text-sm text-zinc-500 mt-1">Sign in to enter the hotel</p>
+    <div className="max-w-lg mx-auto">
+      <div className="rounded overflow-hidden">
+        <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-white font-bold text-sm shadow-md">
+          Login to HabboRetro
         </div>
-
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-lg text-zinc-100 flex items-center gap-2">
-              <LogIn className="w-5 h-5 text-sky-400" />
-              Login
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              {error && (
-                <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {error}
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-zinc-300">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-sky-500"
-                />
+        <div className="bg-zinc-900 p-6 border border-zinc-800 border-t-0">
+          <form onSubmit={handleLogin} className="space-y-3">
+            {error && (
+              <div className="p-3 bg-red-900/30 border border-red-800 rounded text-sm text-red-400">
+                {error}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-zinc-300">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-sky-500"
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold"
-              >
-                {loading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
-            <div className="mt-4 text-center">
-              <p className="text-sm text-zinc-500">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-sky-400 hover:text-sky-300 font-medium">
-                  Register here
-                </Link>
-              </p>
+            )}
+            <div>
+              <label className="block mb-1.5 font-bold text-xs text-zinc-400 uppercase tracking-wider">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+                required
+                className="w-full h-11 px-4 bg-black/60 border border-zinc-700 rounded-lg text-white text-sm outline-none focus:border-teal-500 focus:shadow-[0_0_10px_rgba(136,211,206,0.3)] transition-all placeholder:text-zinc-600"
+              />
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <label className="block mb-1.5 font-bold text-xs text-zinc-400 uppercase tracking-wider">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                className="w-full h-11 px-4 bg-black/60 border border-zinc-700 rounded-lg text-white text-sm outline-none focus:border-teal-500 focus:shadow-[0_0_10px_rgba(136,211,206,0.3)] transition-all placeholder:text-zinc-600"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-700 hover:to-sky-600 text-white font-bold rounded-md transition-all shadow-md cursor-pointer disabled:opacity-50 mt-2"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-zinc-500">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-teal-400 hover:text-teal-300 font-medium">
+                Register for free
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,139 +1,226 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { isLoggedIn, getUsername, clearAuth } from "../api";
-import { Home, User, Users, LogIn, UserPlus, LogOut, Gamepad2, Newspaper } from "lucide-react";
+import { useState } from "react";
+import { LogOut, ChevronDown, Gamepad2 } from "lucide-react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const loggedIn = isLoggedIn();
   const username = getUsername();
+  const [communityOpen, setCommunityOpen] = useState(false);
+  const [meOpen, setMeOpen] = useState(false);
 
   const handleLogout = () => {
     clearAuth();
     navigate("/");
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+
+  // Don't show layout chrome on client page
+  if (location.pathname === "/client") {
+    return <>{children}</>;
+  }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Top Bar */}
-      <header className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 shadow-lg shadow-sky-500/20">
-        <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-black text-white" style={{ fontFamily: "'Roboto', sans-serif" }}>
+      {/* Header */}
+      <header className="bg-zinc-950 border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm border border-white/30 group-hover:bg-white/30 transition-all">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-teal-400 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
                 <Gamepad2 className="w-6 h-6 text-white" />
               </div>
               <div>
                 <span className="text-xl font-black text-white tracking-tight">HABBO</span>
-                <span className="text-xl font-light text-sky-100">RETRO</span>
+                <span className="text-xl font-light text-purple-300">RETRO</span>
               </div>
             </Link>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              <NavLink to="/" active={isActive("/")} icon={<Home className="w-4 h-4" />} label="Home" />
-              <NavLink to="/community" active={isActive("/community")} icon={<Users className="w-4 h-4" />} label="Community" />
-              <NavLink to="/news" active={isActive("/news")} icon={<Newspaper className="w-4 h-4" />} label="News" />
-              {loggedIn && (
-                <>
-                  <NavLink to="/me" active={isActive("/me")} icon={<User className="w-4 h-4" />} label="Me" />
-                  <NavLink to="/client" active={isActive("/client")} icon={<Gamepad2 className="w-4 h-4" />} label="Enter Hotel" />
-                </>
-              )}
-            </nav>
-
-            {/* Auth */}
-            <div className="flex items-center gap-2">
+            {/* Header Right - Auth Buttons or User Info */}
+            <div className="flex items-center gap-3">
               {loggedIn ? (
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-sky-100 hidden sm:block">
+                <>
+                  <span className="text-sm text-zinc-400 hidden sm:block">
                     Welcome, <strong className="text-white">{username}</strong>
                   </span>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg border border-white/20 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded border border-zinc-700 transition-all"
                   >
                     <LogOut className="w-4 h-4" />
                     <span className="hidden sm:inline">Logout</span>
                   </button>
-                </div>
+                </>
               ) : (
                 <div className="flex items-center gap-2">
+                  <span className="text-sm text-zinc-400 hidden md:block">Join our community and make new friends</span>
                   <Link
                     to="/login"
-                    className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg border border-white/20 transition-all"
+                    className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium"
                   >
-                    <LogIn className="w-4 h-4" />
                     Login
                   </Link>
+                  <span className="text-zinc-600 text-sm">or</span>
                   <Link
                     to="/register"
-                    className="flex items-center gap-1.5 px-4 py-1.5 bg-white hover:bg-sky-50 text-sky-600 text-sm rounded-lg font-semibold transition-all"
+                    className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg shadow-purple-500/20"
                   >
-                    <UserPlus className="w-4 h-4" />
-                    Register
+                    Register for free!
                   </Link>
                 </div>
               )}
             </div>
           </div>
         </div>
-
-        {/* Mobile Nav */}
-        <div className="md:hidden flex items-center gap-1 px-4 pb-2 overflow-x-auto">
-          <NavLink to="/" active={isActive("/")} icon={<Home className="w-4 h-4" />} label="Home" />
-          <NavLink to="/community" active={isActive("/community")} icon={<Users className="w-4 h-4" />} label="Community" />
-          <NavLink to="/news" active={isActive("/news")} icon={<Newspaper className="w-4 h-4" />} label="News" />
-          {loggedIn && (
-            <>
-              <NavLink to="/me" active={isActive("/me")} icon={<User className="w-4 h-4" />} label="Me" />
-              <NavLink to="/client" active={isActive("/client")} icon={<Gamepad2 className="w-4 h-4" />} label="Enter Hotel" />
-            </>
-          )}
-        </div>
       </header>
 
+      {/* Navigation Bar - Only show when logged in */}
+      {loggedIn && (
+        <nav className="bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-800/50 shadow-lg relative z-50">
+          <div className="max-w-6xl mx-auto px-4">
+            <ul className="flex items-center gap-0">
+              {/* Me Dropdown */}
+              <li
+                className="relative"
+                onMouseEnter={() => setMeOpen(true)}
+                onMouseLeave={() => setMeOpen(false)}
+              >
+                <Link
+                  to="/me"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isActive("/me")
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Me <span className="font-bold">{username}</span>
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                </Link>
+                {meOpen && (
+                  <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
+                    <li>
+                      <Link to="/me" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Home
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/me/page" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        My Page
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/me/settings" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Account Settings
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+
+              {/* Community Dropdown */}
+              <li
+                className="relative"
+                onMouseEnter={() => setCommunityOpen(true)}
+                onMouseLeave={() => setCommunityOpen(false)}
+              >
+                <Link
+                  to="/community"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isActive("/community")
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Community
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                </Link>
+                {communityOpen && (
+                  <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
+                    <li>
+                      <Link to="/community" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Posts
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/community/photos" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Photos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/staff" className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Hotel Staff
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+
+              {/* Staff */}
+              <li>
+                <Link
+                  to="/staff"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isActive("/staff")
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Staff
+                </Link>
+              </li>
+
+              {/* Store */}
+              <li>
+                <Link
+                  to="/store"
+                  className={`flex items-center gap-1.5 px-5 py-3 text-sm font-medium transition-all ${
+                    isActive("/store")
+                      ? "bg-black/30 text-white"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Store
+                </Link>
+              </li>
+
+              {/* Enter Hotel - right aligned */}
+              <li className="ml-auto">
+                <Link
+                  to="/client"
+                  className="flex items-center gap-1.5 px-5 py-3 text-sm font-bold text-yellow-300 hover:bg-black/20 hover:text-yellow-200 transition-all"
+                >
+                  <Gamepad2 className="w-4 h-4" />
+                  Enter Hotel
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      )}
+
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-6">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800 bg-zinc-950 mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <footer className="border-t border-zinc-900 bg-black mt-12">
+        <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Gamepad2 className="w-5 h-5 text-sky-500" />
-              <span className="font-bold text-zinc-400">HabboRetro</span>
+              <Gamepad2 className="w-5 h-5 text-purple-500" />
+              <span className="font-bold text-zinc-500">HabboRetro</span>
             </div>
-            <p className="text-sm text-zinc-500">
-              Powered by Nitro HTML5 Client &amp; Arcturus Morningstar Emulator
-            </p>
             <p className="text-xs text-zinc-600">
-              Not affiliated with Sulake Corporation Oy
+              Powered by Nitro HTML5 &amp; Arcturus Morningstar | Not affiliated with Sulake
             </p>
           </div>
         </div>
       </footer>
     </div>
-  );
-}
-
-function NavLink({ to, active, icon, label }: { to: string; active: boolean; icon: React.ReactNode; label: string }) {
-  return (
-    <Link
-      to={to}
-      className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-all ${
-        active
-          ? "bg-white/20 text-white font-semibold"
-          : "text-sky-100 hover:bg-white/10 hover:text-white"
-      }`}
-    >
-      {icon}
-      {label}
-    </Link>
   );
 }

@@ -1,5 +1,6 @@
 import os
 import asyncio
+import base64
 from pathlib import Path
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
@@ -15,6 +16,7 @@ from app.routes.auth_routes import router as auth_router
 from app.routes.community_routes import router as community_router
 from app.routes.news_routes import router as news_router
 from app.routes.users_routes import router as users_router
+from app.routes.staff_routes import router as staff_router
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
@@ -39,6 +41,7 @@ app.include_router(auth_router)
 app.include_router(community_router)
 app.include_router(news_router)
 app.include_router(users_router)
+app.include_router(staff_router)
 
 
 @app.get("/healthz")
@@ -53,8 +56,20 @@ C_IMAGES_CDNS = [
     "https://images.bobba.io",
     "https://images.habbo.com",
 ]
+# Additional CDN sources for non-c_images assets (dcr/hof_furni, etc.)
+GENERAL_CDNS = [
+    "https://assets.nitrodev.co",
+    "https://images.bobba.io",
+    "https://images.habbo.com",
+]
 LOCAL_C_IMAGES_DIR = STATIC_DIR / "c_images"
+LOCAL_ASSETS_DIR = STATIC_DIR / "habbo_assets_cache"
 _http_client = None
+
+# 1x1 transparent PNG placeholder for missing images (avoids broken icons in UI)
+_TRANSPARENT_1PX_PNG = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+)
 
 def get_http_client():
     global _http_client
@@ -105,21 +120,52 @@ async def proxy_assets(asset_path: str):
                     )
             except Exception:
                 continue
+        # Return transparent placeholder for missing catalog images
+        if sub_path.endswith((".png", ".gif")):
+            return Response(
+                content=_TRANSPARENT_1PX_PNG,
+                status_code=200,
+                media_type="image/png",
+                headers={"Cache-Control": "public, max-age=3600"},
+            )
         return Response(content=b"Asset not found", status_code=404)
-    # Non-c_images assets go to nitrodev CDN
-    client = get_http_client()
-    upstream_url = f"{ASSET_CDN_URL}/{asset_path}"
-    try:
-        resp = await client.get(upstream_url)
-        content_type = resp.headers.get("content-type", "application/octet-stream")
-        return Response(
-            content=resp.content,
-            status_code=resp.status_code,
-            media_type=content_type,
+    # Non-c_images assets: check local cache first, then try multiple CDNs
+    cached_file = LOCAL_ASSETS_DIR / asset_path
+    if cached_file.is_file():
+        return FileResponse(
+            str(cached_file),
             headers={"Cache-Control": "public, max-age=86400"},
         )
-    except Exception:
-        return Response(content=b"Asset not found", status_code=502)
+    client = get_http_client()
+    for cdn_base in GENERAL_CDNS:
+        try:
+            resp = await client.get(f"{cdn_base}/{asset_path}")
+            if resp.status_code == 200:
+                content_type = resp.headers.get("content-type", "application/octet-stream")
+                # Don't cache HTML error pages
+                if b"<!DOCTYPE" not in resp.content[:50]:
+                    try:
+                        cached_file.parent.mkdir(parents=True, exist_ok=True)
+                        cached_file.write_bytes(resp.content)
+                    except Exception:
+                        pass
+                return Response(
+                    content=resp.content,
+                    status_code=200,
+                    media_type=content_type,
+                    headers={"Cache-Control": "public, max-age=86400"},
+                )
+        except Exception:
+            continue
+    # Return transparent placeholder for missing image assets
+    if asset_path.endswith((".png", ".gif", ".jpg", ".jpeg")):
+        return Response(
+            content=_TRANSPARENT_1PX_PNG,
+            status_code=200,
+            media_type="image/png",
+            headers={"Cache-Control": "public, max-age=3600"},
+        )
+    return Response(content=b"Asset not found", status_code=404)
 
 
 # WebSocket proxy to Arcturus game server

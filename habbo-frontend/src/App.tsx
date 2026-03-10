@@ -7,6 +7,8 @@ import { MePage } from "./pages/MePage";
 import { CommunityPage } from "./pages/CommunityPage";
 import { NewsPage } from "./pages/NewsPage";
 import { ClientPage } from "./pages/ClientPage";
+import { StaffPage } from "./pages/StaffPage";
+import { StorePage } from "./pages/StorePage";
 
 function App() {
   return (
@@ -17,8 +19,12 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/me" element={<MePage />} />
+          <Route path="/me/page" element={<MePage />} />
+          <Route path="/me/settings" element={<MePage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/news" element={<NewsPage />} />
+          <Route path="/staff" element={<StaffPage />} />
+          <Route path="/store" element={<StorePage />} />
           <Route path="/client" element={<ClientPage />} />
         </Routes>
       </Layout>
