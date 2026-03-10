@@ -57,11 +57,15 @@ export function HomePage() {
   const [loading, setLoading] = useState(false);
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userLook, setUserLook] = useState("");
 
   useEffect(() => {
     if (loggedIn) {
       apiGet("/api/home").then(setHomeData).catch(() => {});
-      apiGet("/api/auth/me").then(setProfile).catch(() => {});
+      apiGet("/api/auth/me").then((data) => {
+        setProfile(data);
+        if (data.look) setUserLook(data.look);
+      }).catch(() => {});
     }
   }, [loggedIn]);
 
@@ -105,11 +109,21 @@ export function HomePage() {
           {/* Room Preview / Welcome Banner */}
           <div className="rounded overflow-hidden">
             <div className="relative bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
-              <div className="h-48 bg-gradient-to-br from-purple-900/40 via-zinc-900 to-teal-900/30 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10" style={{backgroundImage: "url('https://images.habbo.com/c_images/web_promo/lpromo_HabboWay2.png')", backgroundSize: "cover", backgroundPosition: "center"}} />
-                <div className="relative z-10 text-center">
-                  <h2 className="text-2xl font-black text-white tracking-tight">Welcome to <span className="text-purple-400">HabboRetro</span></h2>
-                  <p className="text-zinc-400 text-sm mt-1">Create, explore, and connect with friends</p>
+              <div className="h-52 relative overflow-hidden">
+                <img
+                  src="https://hab-blog.weebly.com/uploads/1/2/1/7/12173803/1560267_orig.gif"
+                  alt="Hotel Scene"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* User avatar overlay */}
+                {profile && userLook && (
+                  <div className="absolute bottom-0 left-6 z-10">
+                    <HabboAvatar look={userLook} size="large" direction={2} />
+                  </div>
+                )}
+                {/* Hotel name overlay */}
+                <div className="absolute top-3 right-4 z-10 bg-black/60 backdrop-blur-sm px-4 py-1.5 rounded">
+                  <span className="text-white font-black text-sm tracking-wide">HABBORETRO</span>
                 </div>
               </div>
               {/* Currency Bar */}
