@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+dist/
+.venv/
+static/nitro/assets/
+static/nitro/src/
+static/assets/
