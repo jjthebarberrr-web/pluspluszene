@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+
+# Build
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Env
+.env
+*.env.local
+
+# Database files
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large binary dirs (download separately)
+habbo-backend/static/c_images/
+nitro-client/node_modules/
+habbo-frontend/node_modules/
+nitro-docker/
+
+# Arcturus build artifacts but keep the JAR and config
+arcturus-server/logs/
+arcturus-server/*.log
+
+# Keep these
+!habbo-backend/static/nitro/
+!arcturus-server/Arcturus.jar
+!arcturus-server/plugins/
+!arcturus-server/config.ini
