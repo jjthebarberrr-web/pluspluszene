@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { apiGet } from "../api";
+import { useEffect, useState, useCallback } from "react";
+import { apiGet, apiPost, isLoggedIn } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 
 interface NewsArticle {
@@ -10,14 +10,46 @@ interface NewsArticle {
   author: string;
   category: string;
   created_at: number;
+  reactions?: Record<string, number>;
+  comment_count?: number;
+}
+
+interface Comment {
+  id: number;
+  article_id: number;
+  user_id: number;
+  username: string;
+  look: string;
+  content: string;
+  created_at: number;
 }
 
 export function NewsPage() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [reactions, setReactions] = useState<Record<string, number>>({});
+  const [userReactions, setUserReactions] = useState<string[]>([]);
+  const [posting, setPosting] = useState(false);
 
   useEffect(() => {
     loadNews();
+  }, []);
+
+  const loadReactions = useCallback(async (articleId: number) => {
+    try {
+      const data = await apiGet(`/api/news/${articleId}/reactions`);
+      setReactions(data.reactions || {});
+      setUserReactions(data.user_reactions || []);
+    } catch { /* ignore */ }
+  }, []);
+
+  const loadComments = useCallback(async (articleId: number) => {
+    try {
+      const data = await apiGet(`/api/news/${articleId}/comments`);
+      setComments(data.comments || []);
+    } catch { /* ignore */ }
   }, []);
 
   const loadNews = async () => {
@@ -26,10 +58,40 @@ export function NewsPage() {
       setArticles(data.articles);
       if (data.articles.length > 0) {
         setSelectedArticle(data.articles[0]);
+        loadReactions(data.articles[0].id);
+        loadComments(data.articles[0].id);
       }
     } catch {
       // ignore
     }
+  };
+
+  const selectArticle = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    setComments([]);
+    setReactions({});
+    setUserReactions([]);
+    loadReactions(article.id);
+    loadComments(article.id);
+  };
+
+  const handleReaction = async (emoji: string) => {
+    if (!selectedArticle || !isLoggedIn()) return;
+    try {
+      await apiPost(`/api/news/${selectedArticle.id}/reactions`, { emoji });
+      loadReactions(selectedArticle.id);
+    } catch { /* ignore */ }
+  };
+
+  const handlePostComment = async () => {
+    if (!selectedArticle || !commentText.trim() || posting || !isLoggedIn()) return;
+    setPosting(true);
+    try {
+      await apiPost(`/api/news/${selectedArticle.id}/comments`, { content: commentText.trim() });
+      setCommentText("");
+      loadComments(selectedArticle.id);
+    } catch { /* ignore */ }
+    setPosting(false);
   };
 
   const formatDate = (ts: number) => {
@@ -88,31 +150,37 @@ export function NewsPage() {
                 paddingTop: "12px",
                 borderTop: "1px solid #2a2a2a",
               }}>
-                {["😄", "❤️", "🔥", "👍", "😮", "👑"].map((emoji) => (
+                {["😄", "❤️", "🔥", "👍", "😮", "👑"].map((emoji) => {
+                  const count = reactions[emoji] || 0;
+                  const active = userReactions.includes(emoji);
+                  return (
                   <div
                     key={emoji}
+                    onClick={() => handleReaction(emoji)}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "5px",
-                      background: "rgba(30,30,30,0.95)",
-                      border: "1px solid #2a2a2a",
+                      background: active ? "rgba(92,34,158,0.4)" : "rgba(30,30,30,0.95)",
+                      border: active ? "1px solid #5C229E" : "1px solid #2a2a2a",
                       boxShadow: "inset 2px 2px rgba(255,255,255,0.1), inset -2px -2px rgba(255,255,255,0.1)",
                       borderRadius: "4px",
                       padding: "4px 10px 4px 6px",
-                      cursor: "pointer",
+                      cursor: isLoggedIn() ? "pointer" : "default",
                       fontSize: "13px",
                       color: "#ddd",
                       transition: "background 0.15s",
                       userSelect: "none",
+                      opacity: isLoggedIn() ? 1 : 0.5,
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#2a2a2a"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(30,30,30,0.95)"; }}
+                    onMouseEnter={(e) => { if (isLoggedIn()) (e.currentTarget as HTMLElement).style.background = active ? "rgba(92,34,158,0.6)" : "#2a2a2a"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = active ? "rgba(92,34,158,0.4)" : "rgba(30,30,30,0.95)"; }}
                   >
                     <span>{emoji}</span>
-                    <span style={{ fontWeight: "bold", fontSize: "12px" }}>0</span>
+                    <span style={{ fontWeight: "bold", fontSize: "12px" }}>{count}</span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </article>
@@ -145,16 +213,36 @@ export function NewsPage() {
             fontSize: "14px",
             borderBottom: "1px solid #333",
           }}>
-            Comments
+            Comments ({comments.length})
           </div>
           <div style={{ padding: "16px" }}>
-            <p style={{ color: "#666", textAlign: "center", fontSize: "13px", padding: "20px 0" }}>
-              There are no Comments yet.
-            </p>
+            {comments.length === 0 ? (
+              <p style={{ color: "#666", textAlign: "center", fontSize: "13px", padding: "20px 0" }}>
+                There are no Comments yet. Be the first to comment!
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {comments.map((c) => (
+                  <div key={c.id} style={{ display: "flex", gap: "10px", padding: "10px", background: "#111", borderRadius: "6px", border: "1px solid #222" }}>
+                    <div style={{ flexShrink: 0, marginTop: "-8px", marginBottom: "-16px", imageRendering: "pixelated" as const }}>
+                      <HabboAvatar look={c.look || "hd-180-1.ch-255-66.lg-280-110"} size="small" direction={2} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                        <span style={{ fontWeight: "bold", fontSize: "13px", color: "#ddd" }}>{c.username}</span>
+                        <span style={{ fontSize: "11px", color: "#666" }}>{formatDate(c.created_at)}</span>
+                      </div>
+                      <div style={{ fontSize: "13px", color: "#aaa", lineHeight: "1.5", wordBreak: "break-word" as const }}>{c.content}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Post a Comment */}
+        {isLoggedIn() ? (
         <div style={{ background: "#1a1a1a", borderRadius: "8px", overflow: "hidden", border: "1px solid #2a2a2a", marginTop: "16px" }}>
           <div style={{
             background: "linear-gradient(135deg, #5CB565, #1a1a1a)",
@@ -169,6 +257,8 @@ export function NewsPage() {
           <div style={{ padding: "16px" }}>
             <textarea
               placeholder="Type your message here..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
               style={{
                 width: "100%",
                 height: "90px",
@@ -185,15 +275,18 @@ export function NewsPage() {
               }}
               onFocus={(e) => { e.currentTarget.style.borderColor = "#5C229E"; }}
               onBlur={(e) => { e.currentTarget.style.borderColor = "#333"; }}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handlePostComment(); } }}
             />
             <button
+              onClick={handlePostComment}
+              disabled={posting || !commentText.trim()}
               style={{
                 backgroundImage: "url(https://fresh-hotel.org/image/bargradient.png)",
                 backgroundSize: "contain",
                 backgroundColor: "#5C229E",
                 color: "#fff",
                 fontWeight: "bold",
-                cursor: "pointer",
+                cursor: posting || !commentText.trim() ? "not-allowed" : "pointer",
                 border: "none",
                 borderRadius: "4px",
                 padding: "10px",
@@ -201,14 +294,20 @@ export function NewsPage() {
                 fontSize: "14px",
                 marginTop: "8px",
                 transition: "opacity 0.2s",
+                opacity: posting || !commentText.trim() ? 0.5 : 1,
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+              onMouseEnter={(e) => { if (!posting && commentText.trim()) (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = posting || !commentText.trim() ? "0.5" : "1"; }}
             >
-              Post
+              {posting ? "Posting..." : "Post"}
             </button>
           </div>
         </div>
+        ) : (
+        <div style={{ background: "#1a1a1a", borderRadius: "8px", overflow: "hidden", border: "1px solid #2a2a2a", marginTop: "16px", padding: "20px", textAlign: "center" }}>
+          <p style={{ color: "#666", fontSize: "13px" }}>Log in to post comments and react to articles.</p>
+        </div>
+        )}
       </div>
 
       {/* Right Side - Sidebar */}
@@ -293,7 +392,7 @@ export function NewsPage() {
             {articles.map((article) => (
               <div
                 key={article.id}
-                onClick={() => setSelectedArticle(article)}
+                onClick={() => selectArticle(article)}
                 style={{
                   display: "flex",
                   background: selectedArticle?.id === article.id ? "#252525" : "#1f1f1f",
