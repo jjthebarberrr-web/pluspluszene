@@ -144,6 +144,10 @@ async def post_comment(article_id: int, req: CommentRequest, request: Request):
     await _ensure_news_tables()
     token = request.cookies.get("token")
     if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+    if not token:
         raise HTTPException(401, "Login required")
     from app.auth import decode_token
     payload = decode_token(token)
@@ -187,6 +191,10 @@ async def get_reactions(article_id: int, request: Request):
 
             user_reactions: list[str] = []
             token = request.cookies.get("token")
+            if not token:
+                auth_header = request.headers.get("Authorization", "")
+                if auth_header.startswith("Bearer "):
+                    token = auth_header[7:]
             if token:
                 from app.auth import decode_token
                 payload = decode_token(token)
@@ -204,6 +212,10 @@ async def get_reactions(article_id: int, request: Request):
 async def toggle_reaction(article_id: int, req: ReactionRequest, request: Request):
     await _ensure_news_tables()
     token = request.cookies.get("token")
+    if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
     if not token:
         raise HTTPException(401, "Login required")
     from app.auth import decode_token

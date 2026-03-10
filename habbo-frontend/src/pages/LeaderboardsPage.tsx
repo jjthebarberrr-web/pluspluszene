@@ -9,6 +9,7 @@ interface LeaderboardUser {
   motto: string;
   credits: number;
   pixels: number;
+  diamonds: number;
   online: number;
   account_created: number;
 }
@@ -16,14 +17,14 @@ interface LeaderboardUser {
 interface AllBoards {
   richest: LeaderboardUser[];
   most_pixels: LeaderboardUser[];
-  online_now: LeaderboardUser[];
+  most_diamonds: LeaderboardUser[];
   oldest: LeaderboardUser[];
 }
 
 const boardConfig: { key: keyof AllBoards; label: string; emoji: string; color: string; gradient: string; getValue: (u: LeaderboardUser) => string }[] = [
   { key: "richest", label: "Richest", emoji: "\u{1F4B0}", color: "#E8A820", gradient: "linear-gradient(135deg, #E8A820, #1a1a1a)", getValue: (u) => `${u.credits.toLocaleString()} credits` },
   { key: "most_pixels", label: "Most Pixels", emoji: "\u{2B50}", color: "#5CB565", gradient: "linear-gradient(135deg, #5CB565, #1a1a1a)", getValue: (u) => `${u.pixels.toLocaleString()} pixels` },
-  { key: "online_now", label: "Online Now", emoji: "\u{1F7E2}", color: "#1e7295", gradient: "linear-gradient(135deg, #1e7295, #1a1a1a)", getValue: (u) => u.online ? "Online" : "Offline" },
+  { key: "most_diamonds", label: "Most Diamonds", emoji: "\u{1F48E}", color: "#00CFC1", gradient: "linear-gradient(135deg, #00CFC1, #1a1a1a)", getValue: (u) => `${(u.diamonds || 0).toLocaleString()} diamonds` },
   { key: "oldest", label: "Oldest Accounts", emoji: "\u{23F3}", color: "#5C229E", gradient: "linear-gradient(135deg, #5C229E, #1a1a1a)", getValue: (u) => { const d = new Date(u.account_created * 1000); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } },
 ];
 
