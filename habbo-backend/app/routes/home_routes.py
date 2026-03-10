@@ -72,10 +72,24 @@ async def get_home_data():
                     "created_at": n[3],
                 })
 
+            # Newest registered user
+            await cur.execute(
+                "SELECT id, username, look FROM users WHERE username != 'Systemaccount' ORDER BY id DESC LIMIT 1"
+            )
+            newest_row = await cur.fetchone()
+            newest_user = None
+            if newest_row:
+                newest_user = {
+                    "id": newest_row[0],
+                    "username": newest_row[1],
+                    "look": newest_row[2],
+                }
+
             return {
                 "popular_rooms": rooms,
                 "online_users": online_users,
                 "online_count": online_count,
                 "user_of_week": user_of_week,
                 "latest_news": news,
+                "newest_user": newest_user,
             }
