@@ -38,48 +38,48 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-black text-white" style={{ fontFamily: "'Roboto', sans-serif" }}>
-      {/* Top Banner Image - Like Fresh Hotel */}
-      <div className="w-full relative" style={{background: '#0a0a0a'}}>
-        <div className="max-w-6xl mx-auto relative" style={{height: '120px'}}>
-          <img
-            src="https://images.habbo.com/web_images/defaults/lpromo_gen15_51.png"
-            alt="HabboRetro Banner"
-            className="absolute right-0 top-0 h-full"
-            style={{imageRendering: 'pixelated', objectFit: 'contain'}}
-          />
-          {/* Logo on left */}
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-teal-400 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
-                <Gamepad2 className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="text-2xl font-black text-white tracking-tight">HABBO</span>
-                <span className="text-2xl font-light text-purple-300">RETRO</span>
-              </div>
-            </Link>
-          </div>
-          {/* Right side buttons */}
-          <div className="absolute right-4 top-4 flex items-center gap-3">
-            {loggedIn ? (
-              <>
-                <Link to="/client" className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded font-bold transition-all shadow-lg uppercase tracking-wide">Enter</Link>
-                <span className="text-xs text-zinc-300 bg-black/60 px-3 py-1.5 rounded font-medium">Online Now</span>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-sm rounded border border-zinc-700 transition-all"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium">Login</Link>
-                <span className="text-zinc-500 text-sm">or</span>
-                <Link to="/register" className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg">Register for free!</Link>
-              </>
-            )}
-          </div>
+      {/* Top Banner Image - Full width like Fresh Hotel */}
+      <div className="w-full relative overflow-hidden" style={{background: '#0a0a0a', height: '140px'}}>
+        <img
+          src="https://images.habbo.com/web_images/defaults/lpromo_gen15_51.png"
+          alt="HabboRetro Banner"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{imageRendering: 'pixelated'}}
+        />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0" style={{background: 'linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0) 60%)'}} />
+        {/* Logo on left */}
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-teal-400 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <Gamepad2 className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <span className="text-3xl font-black text-white tracking-tight">HABBO</span>
+              <span className="text-3xl font-light text-purple-300">RETRO</span>
+            </div>
+          </Link>
+        </div>
+        {/* Right side buttons */}
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
+          {loggedIn ? (
+            <>
+              <Link to="/client" className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded font-bold transition-all shadow-lg uppercase tracking-wide">Enter</Link>
+              <span className="text-xs text-zinc-200 bg-black/60 px-3 py-1.5 rounded font-medium">Online Now</span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-2 bg-black/50 hover:bg-black/70 text-zinc-300 text-sm rounded border border-zinc-600 transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="px-5 py-2 bg-zinc-800/80 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium">Login</Link>
+              <span className="text-zinc-400 text-sm">or</span>
+              <Link to="/register" className="px-5 py-2 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg">Register for free!</Link>
+            </>
+          )}
         </div>
       </div>
 
