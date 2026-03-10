@@ -10,7 +10,7 @@ interface VipTier {
   borderColor: string;
   bgGradient: string;
   price: number;
-  currency: "credits" | "diamonds";
+  currency: "usd";
   perks: string[];
   exclusiveItems: string;
   popular?: boolean;
@@ -18,30 +18,30 @@ interface VipTier {
 
 const vipTiers: VipTier[] = [
   {
-    id: 1, rank: 8, name: "VIP Bronze", badge: "VIP1", color: "#CD7F32",
+    id: 1, rank: 2, name: "VIP Bronze", badge: "VIP1", color: "#CD7F32",
     borderColor: "border-amber-700", bgGradient: "from-amber-900 to-amber-700",
-    price: 500, currency: "credits",
+    price: 4.99, currency: "usd",
     perks: ["VIP Bronze badge", "Access to VIP Bronze catalog", "30 exclusive bonus rares", "VIP chat prefix", "Priority room access"],
     exclusiveItems: "Bonus Rares, Mini Rares, Limited Editions",
   },
   {
-    id: 2, rank: 9, name: "VIP Silver", badge: "VIP2", color: "#C0C0C0",
+    id: 2, rank: 3, name: "VIP Silver", badge: "VIP2", color: "#C0C0C0",
     borderColor: "border-zinc-400", bgGradient: "from-zinc-600 to-zinc-400",
-    price: 25, currency: "diamonds", popular: true,
+    price: 9.99, currency: "usd", popular: true,
     perks: ["VIP Silver badge", "Access to Bronze + Silver catalog", "30 premium rares", "Name change command", "Fast walk & moonwalk", "VIP chat prefix"],
     exclusiveItems: "Rainbow LTDs, Premium Bonus Rares",
   },
   {
-    id: 3, rank: 10, name: "VIP Gold", badge: "VIP3", color: "#FFD700",
+    id: 3, rank: 4, name: "VIP Gold", badge: "VIP3", color: "#FFD700",
     borderColor: "border-yellow-500", bgGradient: "from-yellow-700 to-yellow-500",
-    price: 50, currency: "diamonds",
+    price: 19.99, currency: "usd",
     perks: ["VIP Gold badge", "Access to Bronze + Silver + Gold catalog", "40 ultra rare items", "Mimic command", "Teleport command", "All Silver perks included"],
     exclusiveItems: "Diamond Furni, NFT Rares, Ultra Bonus Rares",
   },
   {
-    id: 4, rank: 11, name: "VIP Diamond", badge: "VIP4", color: "#B9F2FF",
+    id: 4, rank: 5, name: "VIP Diamond", badge: "VIP4", color: "#B9F2FF",
     borderColor: "border-sky-300", bgGradient: "from-sky-600 to-sky-300",
-    price: 100, currency: "diamonds", popular: true,
+    price: 29.99, currency: "usd", popular: true,
     perks: ["VIP Diamond badge", "Access to ALL VIP catalogs", "50 most exclusive rares", "Dance all command", "Faceless mode", "Enter full rooms", "Enter any room", "All Gold perks included"],
     exclusiveItems: "HabPlus 25th Anniversary, Ultra LTDs, Legendary Rares",
   },
@@ -52,20 +52,21 @@ interface StoreItem {
   name: string;
   description: string;
   price: number;
-  currency: "credits" | "diamonds" | "duckets";
+  currency: "usd";
   category: string;
   popular?: boolean;
 }
 
 const storeItems: StoreItem[] = [
-  { id: "name_change", name: "Name Change", description: "Change your username to something new. One-time use per purchase.", price: 250, currency: "credits", category: "perks" },
-  { id: "room_boost", name: "Room Boost", description: "Boost your room to the top of the navigator for 24 hours. Get more visitors!", price: 100, currency: "credits", category: "perks", popular: true },
-  { id: "badge_custom", name: "Custom Badge", description: "Get a custom badge designed for you. Contact staff after purchase to design it.", price: 15, currency: "diamonds", category: "exclusive" },
-  { id: "gift_box", name: "Mystery Gift Box", description: "Open a mystery box containing random rare furni, credits, or special items!", price: 75, currency: "credits", category: "items", popular: true },
-  { id: "credit_pack", name: "Diamond Pack (5)", description: "Get 5 diamonds to spend on exclusive items in the store and catalog.", price: 300, currency: "credits", category: "currency" },
-  { id: "double_xp", name: "Double Rewards (7 Days)", description: "Earn double credits and duckets from all activities for 7 days.", price: 10, currency: "diamonds", category: "perks" },
-  { id: "room_layout", name: "Custom Room Layout", description: "Unlock a premium room layout for building unique rooms.", price: 150, currency: "duckets", category: "perks" },
-  { id: "rare_box", name: "Rare Surprise Box", description: "Contains a random rare item from the catalog. Could be anything!", price: 5, currency: "diamonds", category: "items", popular: true },
+  { id: "name_change", name: "Name Change", description: "Change your username to something new. One-time use per purchase.", price: 2.99, currency: "usd", category: "perks" },
+  { id: "room_boost", name: "Room Boost", description: "Boost your room to the top of the navigator for 24 hours. Get more visitors!", price: 1.99, currency: "usd", category: "perks", popular: true },
+  { id: "badge_custom", name: "Custom Badge", description: "Get a custom badge designed for you. Contact staff after purchase to design it.", price: 4.99, currency: "usd", category: "exclusive" },
+  { id: "gift_box", name: "Mystery Gift Box", description: "Open a mystery box containing random rare furni, credits, or special items!", price: 1.49, currency: "usd", category: "items", popular: true },
+  { id: "credit_pack", name: "Credit Pack (5,000)", description: "Get 5,000 credits to spend on furniture, clothing, and more in the catalog.", price: 4.99, currency: "usd", category: "currency" },
+  { id: "diamond_pack", name: "Diamond Pack (25)", description: "Get 25 diamonds to spend on exclusive items in the store and catalog.", price: 9.99, currency: "usd", category: "currency" },
+  { id: "double_xp", name: "Double Rewards (7 Days)", description: "Earn double credits and duckets from all activities for 7 days.", price: 3.99, currency: "usd", category: "perks" },
+  { id: "room_layout", name: "Custom Room Layout", description: "Unlock a premium room layout for building unique rooms.", price: 1.99, currency: "usd", category: "perks" },
+  { id: "rare_box", name: "Rare Surprise Box", description: "Contains a random rare item from the catalog. Could be anything!", price: 2.49, currency: "usd", category: "items", popular: true },
 ];
 
 const storeCategories = [
@@ -76,8 +77,8 @@ const storeCategories = [
   { key: "currency", label: "Currency" },
 ];
 
-const currencyColor = (c: string) => c === "credits" ? "text-yellow-400" : c === "diamonds" ? "text-sky-400" : "text-purple-400";
-const currencyIcon = (c: string) => c === "credits" ? "https://fresh-hotel.org/nitro-assets-new/images/wallet/1.png" : c === "diamonds" ? "https://fresh-hotel.org/nitro-assets-new/images/wallet/0.png" : "https://fresh-hotel.org/nitro-assets-new/images/wallet/0.png";
+const currencyColor = () => "text-emerald-400";
+const formatPrice = (price: number) => `$${price.toFixed(2)}`;
 
 export function StorePage() {
   const [activeTab, setActiveTab] = useState<"vip" | "store">("vip");
@@ -135,9 +136,8 @@ export function StorePage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <img src={currencyIcon(tier.currency)} alt={tier.currency} className="w-4 h-4" />
-                      <span className={`font-bold text-lg ${currencyColor(tier.currency)}`}>{tier.price.toLocaleString()}</span>
-                      <span className="text-xs text-zinc-500">{tier.currency}</span>
+                      <span className={`font-bold text-lg ${currencyColor()}`}>{formatPrice(tier.price)}</span>
+                      <span className="text-xs text-zinc-500">USD</span>
                     </div>
                     <button disabled={!loggedIn} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-xs font-bold rounded transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                       {loggedIn ? "Purchase" : "Login Required"}
@@ -163,7 +163,7 @@ export function StorePage() {
           <div className="rounded overflow-hidden">
             <div className="bg-gradient-to-r from-pink-700 to-pink-600 px-4 py-2.5 text-white font-bold text-sm">Hotel Store</div>
             <div className="bg-zinc-900 p-4 border border-zinc-800 border-t-0">
-              <p className="text-sm text-zinc-400">Spend your credits, duckets, and diamonds on exclusive perks and items.</p>
+              <p className="text-sm text-zinc-400">Purchase exclusive perks, items, and currency packs with real money.</p>
             </div>
           </div>
           <div className="flex items-center gap-1 flex-wrap">
@@ -182,9 +182,8 @@ export function StorePage() {
                   <p className="text-xs text-zinc-400 mb-4 flex-1">{item.description}</p>
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center gap-1.5">
-                      <img src={currencyIcon(item.currency)} alt={item.currency} className="w-4 h-4" />
-                      <span className={`font-bold ${currencyColor(item.currency)}`}>{item.price.toLocaleString()}</span>
-                      <span className="text-xs text-zinc-500">{item.currency}</span>
+                      <span className={`font-bold ${currencyColor()}`}>{formatPrice(item.price)}</span>
+                      <span className="text-xs text-zinc-500">USD</span>
                     </div>
                     <button disabled={!loggedIn} className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-xs font-bold rounded transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                       {loggedIn ? "Buy" : "Login"}

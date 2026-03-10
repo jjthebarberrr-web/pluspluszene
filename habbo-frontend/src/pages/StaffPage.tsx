@@ -58,11 +58,11 @@ const rankIcons: Record<string, React.ReactNode> = {
 };
 
 const rankBadgeColors: Record<number, string> = {
-  7: "bg-yellow-900/50 text-yellow-300 border-yellow-700/50",
-  6: "bg-red-900/50 text-red-300 border-red-700/50",
-  5: "bg-purple-900/50 text-purple-300 border-purple-700/50",
-  4: "bg-blue-900/50 text-blue-300 border-blue-700/50",
-  3: "bg-emerald-900/50 text-emerald-300 border-emerald-700/50",
+  10: "bg-yellow-900/50 text-yellow-300 border-yellow-700/50",
+  9: "bg-red-900/50 text-red-300 border-red-700/50",
+  8: "bg-purple-900/50 text-purple-300 border-purple-700/50",
+  7: "bg-blue-900/50 text-blue-300 border-blue-700/50",
+  6: "bg-emerald-900/50 text-emerald-300 border-emerald-700/50",
 };
 
 const rankSmallIcons: Record<string, React.ReactNode> = {

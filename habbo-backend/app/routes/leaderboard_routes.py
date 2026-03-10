@@ -34,7 +34,7 @@ async def get_leaderboard(sort: str = "credits"):
             base_query = """SELECT u.id, u.username, u.look, u.motto, u.credits, u.pixels,
                              COALESCE(uc.amount, 0) as diamonds, u.online, u.account_created
                              FROM users u LEFT JOIN users_currency uc ON u.id = uc.user_id AND uc.type = 5
-                             WHERE u.`rank` < 12"""
+                             WHERE u.`rank` < 6"""
             if sort == "credits":
                 users = await _fetch_board(cur, base_query + " ORDER BY u.credits DESC LIMIT 25")
             elif sort == "pixels":
@@ -56,7 +56,7 @@ async def get_all_leaderboards():
             base_query = """SELECT u.id, u.username, u.look, u.motto, u.credits, u.pixels,
                              COALESCE(uc.amount, 0) as diamonds, u.online, u.account_created
                              FROM users u LEFT JOIN users_currency uc ON u.id = uc.user_id AND uc.type = 5
-                             WHERE u.`rank` < 12"""
+                             WHERE u.`rank` < 6"""
             richest = await _fetch_board(cur, base_query + " ORDER BY u.credits DESC LIMIT 10")
             most_pixels = await _fetch_board(cur, base_query + " ORDER BY u.pixels DESC LIMIT 10")
             most_diamonds = await _fetch_board(cur, base_query + " ORDER BY diamonds DESC LIMIT 10")

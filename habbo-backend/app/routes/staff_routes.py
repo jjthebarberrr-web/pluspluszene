@@ -5,13 +5,13 @@ from app.database import get_pool
 
 router = APIRouter(prefix="/api/staff", tags=["staff"])
 
-# Government-style rank hierarchy (ranks 12-16 are staff)
+# Government-style rank hierarchy (ranks 6-10 are staff)
 RANK_META = {
-    16: {"name": "President", "description": "Supreme leader of the hotel. Sets the vision, makes executive decisions, and represents the community.", "icon": "crown", "color": "from-yellow-600 to-amber-500"},
-    15: {"name": "Vice President", "description": "Second in command. Assists the President and steps in when they're away. Oversees daily operations.", "icon": "shield", "color": "from-red-700 to-red-500"},
-    14: {"name": "Governor", "description": "Regional leaders who manage specific areas of the hotel. Enforce policies and manage events.", "icon": "landmark", "color": "from-purple-700 to-purple-500"},
-    13: {"name": "Senator", "description": "Elected officials who propose and vote on hotel policies. Voice of the community.", "icon": "scale", "color": "from-blue-700 to-blue-500"},
-    12: {"name": "Representative", "description": "Community-elected members who represent player interests and moderate discussions.", "icon": "users", "color": "from-emerald-700 to-emerald-500"},
+    10: {"name": "President", "description": "Supreme leader of the hotel. Sets the vision, makes executive decisions, and represents the community.", "icon": "crown", "color": "from-yellow-600 to-amber-500"},
+    9: {"name": "Vice President", "description": "Second in command. Assists the President and steps in when they're away. Oversees daily operations.", "icon": "shield", "color": "from-red-700 to-red-500"},
+    8: {"name": "Governor", "description": "Regional leaders who manage specific areas of the hotel. Enforce policies and manage events.", "icon": "landmark", "color": "from-purple-700 to-purple-500"},
+    7: {"name": "Senator", "description": "Elected officials who propose and vote on hotel policies. Voice of the community.", "icon": "scale", "color": "from-blue-700 to-blue-500"},
+    6: {"name": "Representative", "description": "Community-elected members who represent player interests and moderate discussions.", "icon": "users", "color": "from-emerald-700 to-emerald-500"},
 }
 
 
@@ -82,9 +82,9 @@ async def get_staff():
             except Exception:
                 pass
 
-            # Get all staff members (ranks 12-16)
+            # Get all staff members (ranks 6-10)
             await cur.execute(
-                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` >= 12 AND `rank` <= 16 ORDER BY `rank` DESC, username ASC"
+                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` >= 6 AND `rank` <= 10 ORDER BY `rank` DESC, username ASC"
             )
             staff_rows = await cur.fetchall()
 
@@ -93,7 +93,7 @@ async def get_staff():
             total_users = (await cur.fetchone())[0]
             await cur.execute("SELECT COUNT(*) FROM users WHERE online = '1'")
             online_users = (await cur.fetchone())[0]
-            await cur.execute("SELECT COUNT(*) FROM users WHERE `rank` > 1")
+            await cur.execute("SELECT COUNT(*) FROM users WHERE `rank` >= 6")
             total_staff = (await cur.fetchone())[0]
 
     # Group by rank
@@ -121,8 +121,8 @@ async def get_staff():
             "online": row[5],
         })
 
-    # Ensure all ranks 12-16 are shown even if empty
-    for r in range(16, 11, -1):
+    # Ensure all ranks 6-10 are shown even if empty
+    for r in range(10, 5, -1):
         if r not in groups_map:
             meta = RANK_META.get(r, {"name": f"Rank {r}", "description": "", "icon": "user", "color": "from-zinc-700 to-zinc-500"})
             rname = rank_names.get(r, meta["name"])
