@@ -41,10 +41,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         if (data.look) setUserLook(data.look);
       }).catch(() => {});
     }
-    // Fetch online count
-    apiGet("/api/home").then((data) => {
-      if (data.online_count !== undefined) setOnlineCount(data.online_count);
-    }).catch(() => {});
+    // Fetch online count initially and every 1 second
+    const fetchOnline = () => {
+      apiGet("/api/home").then((data) => {
+        if (data.online_count !== undefined) setOnlineCount(data.online_count);
+      }).catch(() => {});
+    };
+    fetchOnline();
+    const onlineInterval = setInterval(fetchOnline, 1000);
+    return () => clearInterval(onlineInterval);
   }, [loggedIn]);
 
   const handleLogout = () => {
@@ -64,6 +69,41 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-black text-white" style={{ fontFamily: "'Roboto', sans-serif" }}>
+      {/* Clouds + Rain CSS */}
+      <style>{`
+        @keyframes moveClouds {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100vw); }
+        }
+        @keyframes moveClouds2 {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(100vw); }
+        }
+        @keyframes rainDrop {
+          0% { transform: translateY(-10px); opacity: 0; }
+          10% { opacity: 0.6; }
+          100% { transform: translateY(160px); opacity: 0; }
+        }
+        .cloud {
+          position: absolute;
+          opacity: 0.35;
+          image-rendering: pixelated;
+          pointer-events: none;
+        }
+        .cloud-1 { top: 8px; animation: moveClouds 25s linear infinite; }
+        .cloud-2 { top: 35px; animation: moveClouds2 35s linear infinite; animation-delay: -10s; }
+        .cloud-3 { top: 15px; animation: moveClouds 45s linear infinite; animation-delay: -20s; }
+        .cloud-4 { top: 50px; animation: moveClouds2 30s linear infinite; animation-delay: -5s; }
+        .rain-container { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        .rain-drop {
+          position: absolute;
+          width: 1px;
+          height: 12px;
+          background: linear-gradient(180deg, transparent 0%, rgba(174,194,224,0.5) 50%, rgba(174,194,224,0.15) 100%);
+          animation: rainDrop 0.8s linear infinite;
+        }
+      `}</style>
+
       {/* Top Banner Image - Full width like Fresh Hotel */}
       <div className="w-full relative overflow-hidden" style={{background: '#0a0a0a', height: '140px'}}>
         <img
@@ -73,31 +113,46 @@ export function Layout({ children }: { children: React.ReactNode }) {
           style={{imageRendering: 'pixelated'}}
         />
         {/* Dark overlay for readability */}
-        <div className="absolute inset-0" style={{background: 'linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0) 60%)'}} />
-        {/* Logo on left */}
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
+        <div className="absolute inset-0" style={{background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)'}} />
+
+        {/* Moving Habbo Clouds */}
+        <img src="https://images.habbo.com/c_images/Clouds/cloud_1.png" alt="" className="cloud cloud-1" style={{height: '50px'}} />
+        <img src="https://images.habbo.com/c_images/Clouds/cloud_2.png" alt="" className="cloud cloud-2" style={{height: '40px'}} />
+        <img src="https://images.habbo.com/c_images/Clouds/cloud_1.png" alt="" className="cloud cloud-3" style={{height: '55px'}} />
+        <img src="https://images.habbo.com/c_images/Clouds/cloud_2.png" alt="" className="cloud cloud-4" style={{height: '35px'}} />
+
+        {/* Rain Effect */}
+        <div className="rain-container">
+          {Array.from({length: 40}).map((_, i) => (
+            <div key={i} className="rain-drop" style={{left: `${(i / 40) * 100}%`, animationDelay: `${Math.random() * 0.8}s`, animationDuration: `${0.6 + Math.random() * 0.4}s`}} />
+          ))}
+        </div>
+
+        {/* Centered HabPlus + Online Count */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-teal-400 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <Gamepad2 className="w-7 h-7 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-teal-400 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <Gamepad2 className="w-6 h-6 text-white" />
             </div>
             <div>
-                            <span className="text-3xl font-black text-white tracking-tight">HAB</span>
-                            <span className="text-3xl font-light text-purple-300">PLUS</span>
+              <span className="text-3xl font-black text-white tracking-tight" style={{textShadow: '0 2px 8px rgba(0,0,0,0.7)'}}>HAB</span>
+              <span className="text-3xl font-light text-purple-300" style={{textShadow: '0 2px 8px rgba(0,0,0,0.7)'}}>PLUS</span>
             </div>
           </Link>
+          <div className="mt-1 flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs text-zinc-200 font-bold" style={{textShadow: '0 1px 4px rgba(0,0,0,0.8)'}}>{onlineCount} Users Online</span>
+          </div>
         </div>
-        {/* Online count on right */}
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
-          {!loggedIn ? (
-            <>
-              <Link to="/login" className="px-5 py-2 bg-zinc-800/80 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium">Login</Link>
-              <span className="text-zinc-400 text-sm">or</span>
-              <Link to="/register" className="px-5 py-2 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg">Register for free!</Link>
-            </>
-          ) : (
-            <span className="text-sm text-zinc-200 bg-black/60 px-4 py-2 rounded font-bold">{onlineCount} ONLINE</span>
-          )}
-        </div>
+
+        {/* Login/Register on right (only when not logged in) */}
+        {!loggedIn && (
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
+            <Link to="/login" className="px-5 py-2 bg-zinc-800/80 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium">Login</Link>
+            <span className="text-zinc-400 text-sm">or</span>
+            <Link to="/register" className="px-5 py-2 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg">Register for free!</Link>
+          </div>
+        )}
       </div>
 
       {/* Scrolling Facts Marquee - Directly above nav */}
@@ -255,11 +310,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </button>
                 {meOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
-                    <li>
-                      <Link to="/me" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        Home
-                      </Link>
-                    </li>
                     <li>
                       <Link to="/me/page" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
                         My Page
