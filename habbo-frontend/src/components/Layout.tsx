@@ -312,11 +312,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 onMouseLeave={() => setMeOpen(false)}
               >
                 <button
-                  className={`flex items-center gap-2 px-4 py-1 transition-all border border-transparent hover:border-white/30 ${
-                    isActive("/me")
-                      ? "bg-black/40 text-white border-white/30"
-                      : "text-red-100 hover:bg-black/20 hover:text-white"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-1 transition-all border border-transparent hover:border-white/30 text-red-100 hover:bg-black/20 hover:text-white`}
                 >
                   {userLook && (
                     <div className="w-7 h-7 rounded-full overflow-hidden bg-zinc-800 border border-zinc-600 flex items-center justify-center">
@@ -329,16 +325,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {meOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
                     <li>
-                      <Link to="/me/page" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        My Page
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/me/settings" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        Account Settings
-                      </Link>
-                    </li>
-                    <li className="border-t border-zinc-700">
                       <button onClick={() => { setMeOpen(false); handleLogout(); }} className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-all">
                         <span className="flex items-center gap-2"><LogOut className="w-3.5 h-3.5" /> Logout</span>
                       </button>

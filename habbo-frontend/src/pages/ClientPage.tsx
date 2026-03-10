@@ -86,44 +86,40 @@ export function ClientPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      {/* Slim Info Bar */}
-      <div className="flex items-center justify-between px-4 h-9 flex-shrink-0" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        {/* Left: Online Users */}
+    <div className="fixed inset-0 z-50 bg-black">
+      {/* Transparent Floating Widget */}
+      <div className="absolute top-3 left-3 z-[60] rounded-lg px-4 py-3 flex flex-col gap-2 pointer-events-none" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        {/* Online Count */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-emerald-400" />
-            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-            <span className="text-xs font-semibold text-emerald-300">{onlineCount}</span>
-            <span className="text-xs text-zinc-500">online</span>
-          </div>
+          <Users className="w-4 h-4 text-emerald-400" />
+          <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+          <span className="text-sm font-bold text-white">{onlineCount}</span>
+          <span className="text-xs text-zinc-400">Online</span>
         </div>
 
-        {/* Right: Newest Member */}
+        {/* Newest User */}
         {newestUser && (
           <div className="flex items-center gap-2">
-            <UserPlus className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-xs text-zinc-500">Newest:</span>
-            <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center" style={{ border: '1.5px solid rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.05)' }}>
-                <HabboAvatar look={newestUser.look} size="small" headOnly={true} />
-              </div>
-              <span className="text-xs font-bold text-white">{newestUser.username}</span>
+            <UserPlus className="w-4 h-4 text-purple-400" />
+            <span className="text-xs text-zinc-400">Newest User:</span>
+            <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style={{ border: '2px solid rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)' }}>
+              <HabboAvatar look={newestUser.look} size="small" headOnly={true} />
             </div>
+            <span className="text-xs font-bold text-white">{newestUser.username}</span>
           </div>
         )}
       </div>
 
-      {/* Client Iframe - Takes up all remaining space */}
+      {/* Client Iframe - Full screen */}
       {clientUrl ? (
         <iframe
           src={clientUrl}
-          className="w-full flex-1 border-0"
+          className="w-full h-full border-0"
           allow="autoplay; fullscreen; microphone"
           title="HabPlus Hotel Client"
         />
       ) : (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center">
           <div className="text-center px-8 max-w-lg">
             <div className="w-20 h-20 bg-gradient-to-br from-sky-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-sky-500/30">
               <Loader2 className="w-10 h-10 text-sky-400" />
