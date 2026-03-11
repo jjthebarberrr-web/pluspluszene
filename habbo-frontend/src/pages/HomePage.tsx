@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiPost, apiGet, setAuth, isLoggedIn } from "../api";
-import { Gamepad2, Users, DoorOpen } from "lucide-react";
+import { Gamepad2, Users, DoorOpen, Radio } from "lucide-react";
 import { HabboAvatar } from "../components/HabboAvatar";
 
 interface Room {
@@ -76,7 +76,7 @@ export function HomePage() {
     try {
       const data = await apiPost("/api/auth/login", { username: loginUser, password: loginPass });
       setAuth(data.token, data.username, data.user_id);
-      navigate("/me");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -239,6 +239,36 @@ export function HomePage() {
               ) : (
                 <div className="px-4 py-6 text-center text-sm text-zinc-500">No news yet</div>
               )}
+            </div>
+          </div>
+
+          {/* HabPlus Radio */}
+          <div className="rounded overflow-hidden">
+            <div className="bg-gradient-to-r from-rose-700 to-pink-600 px-4 py-2 text-white font-bold text-sm text-center tracking-wide flex items-center justify-center gap-2">
+              <Radio className="w-4 h-4" />
+              HabPlus Radio
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 border-t-0 p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-600 to-pink-500 rounded-lg flex items-center justify-center">
+                  <Radio className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-bold text-sm">Live Station</p>
+                  <p className="text-xs text-zinc-500">Tune in & listen</p>
+                </div>
+              </div>
+              <div className="bg-black/40 rounded-lg p-3 border border-zinc-700/50">
+                <audio
+                  controls
+                  className="w-full h-8"
+                  style={{ filter: "invert(1) hue-rotate(180deg)", opacity: 0.8 }}
+                >
+                  <source src="http://5.78.42.125:8001/stream" type="audio/mpeg" />
+                  Your browser does not support audio.
+                </audio>
+                <p className="text-[10px] text-zinc-500 text-center mt-2">Press play to listen to HabPlus Radio</p>
+              </div>
             </div>
           </div>
 

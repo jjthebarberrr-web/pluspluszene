@@ -24,7 +24,6 @@ interface StaffGroup {
 
 export function DJStaffPage() {
   const [groups, setGroups] = useState<StaffGroup[]>([]);
-  const [radioDJs, setRadioDJs] = useState<{managers: any[], djs: any[], current_status: any}>({managers: [], djs: [], current_status: {}});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +33,6 @@ export function DJStaffPage() {
         const djGroups = data.groups.filter((g: StaffGroup) => g.rank === 7 || g.rank === 6);
         setGroups(djGroups);
       }),
-      apiGet("/api/radio/djs").then((data) => setRadioDJs(data)).catch(() => {}),
     ])
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -64,12 +62,6 @@ export function DJStaffPage() {
               <h1 className="text-2xl font-bold text-white tracking-tight">HabPlus Radio DJ Staff</h1>
               <p className="text-pink-200/70 text-sm mt-0.5">The voices behind HabPlus Radio</p>
             </div>
-            {radioDJs.current_status?.is_live && (
-              <div className="ml-auto flex items-center gap-2 bg-red-500/20 px-3 py-1.5 rounded-lg border border-red-500/30">
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-xs text-red-200 font-bold uppercase">Live Now</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -82,22 +74,6 @@ export function DJStaffPage() {
             Our DJ Staff run HabPlus Radio, hosting live shows and keeping the hotel entertained with music. 
             DJ Managers oversee the radio team, schedule shows, and ensure broadcast quality. DJs host live shows and entertain the community.
           </p>
-        </div>
-      </div>
-
-      {/* Radio Status */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-        <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
-          <Radio className="w-4 h-4 text-rose-400" />
-          <span className="font-semibold text-sm text-white">Radio Status</span>
-        </div>
-        <div className="p-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${radioDJs.current_status?.is_live ? "bg-red-500 animate-pulse" : "bg-zinc-600"}`} />
-            <span className="text-sm text-zinc-300">
-              {radioDJs.current_status?.is_live ? "On Air - Tune in now!" : "Currently Off Air"}
-            </span>
-          </div>
         </div>
       </div>
 
