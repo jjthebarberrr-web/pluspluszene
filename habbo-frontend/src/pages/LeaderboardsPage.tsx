@@ -12,6 +12,7 @@ interface LeaderboardUser {
   diamonds: number;
   online: number;
   account_created: number;
+  events_won?: number;
 }
 
 interface AllBoards {
@@ -19,13 +20,17 @@ interface AllBoards {
   most_pixels: LeaderboardUser[];
   most_diamonds: LeaderboardUser[];
   oldest: LeaderboardUser[];
+  longest_playing: LeaderboardUser[];
+  most_events_won: LeaderboardUser[];
 }
 
 const boardConfig: { key: keyof AllBoards; label: string; emoji: string; color: string; gradient: string; getValue: (u: LeaderboardUser) => string }[] = [
   { key: "richest", label: "Richest", emoji: "\u{1F4B0}", color: "#E8A820", gradient: "linear-gradient(135deg, #E8A820, #1a1a1a)", getValue: (u) => `${u.credits.toLocaleString()} credits` },
-  { key: "most_pixels", label: "Most Pixels", emoji: "\u{2B50}", color: "#5CB565", gradient: "linear-gradient(135deg, #5CB565, #1a1a1a)", getValue: (u) => `${u.pixels.toLocaleString()} pixels` },
+  { key: "most_pixels", label: "Most Duckets", emoji: "\u{2B50}", color: "#5CB565", gradient: "linear-gradient(135deg, #5CB565, #1a1a1a)", getValue: (u) => `${u.pixels.toLocaleString()} duckets` },
   { key: "most_diamonds", label: "Most Diamonds", emoji: "\u{1F48E}", color: "#00CFC1", gradient: "linear-gradient(135deg, #00CFC1, #1a1a1a)", getValue: (u) => `${(u.diamonds || 0).toLocaleString()} diamonds` },
   { key: "oldest", label: "Oldest Accounts", emoji: "\u{23F3}", color: "#5C229E", gradient: "linear-gradient(135deg, #5C229E, #1a1a1a)", getValue: (u) => { const d = new Date(u.account_created * 1000); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } },
+  { key: "longest_playing", label: "Longest Playing", emoji: "\u{1F525}", color: "#E85D04", gradient: "linear-gradient(135deg, #E85D04, #1a1a1a)", getValue: (u) => { const secs = (u as any).last_online ? ((u as any).last_online - u.account_created) : 0; const days = Math.floor(secs / 86400); return days > 0 ? `${days.toLocaleString()} days` : "Active"; } },
+  { key: "most_events_won", label: "Most Events Won", emoji: "\u{1F3C6}", color: "#D4AF37", gradient: "linear-gradient(135deg, #D4AF37, #1a1a1a)", getValue: (u) => `${(u.events_won || 0)} events won` },
 ];
 
 export function LeaderboardsPage() {
@@ -83,8 +88,8 @@ export function LeaderboardsPage() {
         </div>
       </div>
 
-      {/* 4 Columns */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+      {/* 6 Columns - 3x2 grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
         {boardConfig.map((cfg) => {
           const users = boards ? (boards[cfg.key] || []) : [];
           return (

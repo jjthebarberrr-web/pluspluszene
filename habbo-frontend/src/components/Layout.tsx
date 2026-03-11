@@ -10,6 +10,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const loggedIn = isLoggedIn();
   const username = getUsername();
   const [communityOpen, setCommunityOpen] = useState(false);
+  const [staffOpen, setStaffOpen] = useState(false);
   const [meOpen, setMeOpen] = useState(false);
   const [userLook, setUserLook] = useState("");
   const [onlineCount, setOnlineCount] = useState(0);
@@ -61,8 +62,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
   const isAnyCommunityActive = () =>
-    isActive("/community") || isActive("/photos") || isActive("/staff") ||
-    isActive("/old-staff") || isActive("/vip-list") || isActive("/rare-values");
+    isActive("/community") || isActive("/photos") || isActive("/vip-list") || isActive("/rare-values");
+  const isAnyStaffActive = () =>
+    isActive("/staff") || isActive("/old-staff") || isActive("/event-staff") || isActive("/dj-staff");
 
   // Don't show layout chrome on client page
   if (location.pathname === "/client") {
@@ -224,16 +226,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/staff" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        Hotel Staff
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/old-staff" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
-                        Old Staff
-                      </Link>
-                    </li>
-                    <li>
                       <Link to="/vip-list" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
                         VIP List
                       </Link>
@@ -241,6 +233,47 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <li>
                       <Link to="/rare-values" onClick={() => setCommunityOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
                         Rare Values
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+
+              {/* Staff Dropdown */}
+              <li
+                className="relative"
+                onMouseEnter={() => setStaffOpen(true)}
+                onMouseLeave={() => setStaffOpen(false)}
+              >
+                <button
+                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
+                    isAnyStaffActive()
+                      ? "bg-black/40 text-white border-white/30"
+                      : "text-red-100 hover:bg-black/20 hover:text-white"
+                  }`}
+                >
+                  Staff <img src="https://images.habbo.com/c_images/catalogue/icon_19.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
+                </button>
+                {staffOpen && (
+                  <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-52 z-50">
+                    <li>
+                      <Link to="/staff" onClick={() => setStaffOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Current Staff
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/old-staff" onClick={() => setStaffOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Former Government Officials
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/event-staff" onClick={() => setStaffOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        Event Staff
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/dj-staff" onClick={() => setStaffOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        DJ Staff
                       </Link>
                     </li>
                   </ul>

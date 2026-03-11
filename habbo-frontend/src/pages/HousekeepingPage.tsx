@@ -4,7 +4,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from "../api";
 import {
   LayoutDashboard, Users, Shield, Newspaper, DoorOpen, Settings, Gavel,
   Search, ChevronLeft, ChevronRight, Trash2, Edit3, Plus, Eye, Ban,
-  Crown, Activity, TrendingUp, AlertTriangle, X, Check, Radio
+  Crown, Activity, TrendingUp, AlertTriangle, X, Check, Radio, Calendar
 } from "lucide-react";
 import { HabboAvatar } from "../components/HabboAvatar";
 
@@ -21,6 +21,7 @@ const TABS = [
   { id: "news", label: "News", icon: Newspaper, minRank: 12 },
   { id: "rooms", label: "Rooms", icon: DoorOpen, minRank: 11 },
   { id: "radio", label: "Radio / DJs", icon: Radio, minRank: 7 },
+  { id: "events", label: "Events", icon: Calendar, minRank: 8 },
   { id: "modlogs", label: "Mod Logs", icon: Shield, minRank: 10 },
   { id: "settings", label: "Settings", icon: Settings, minRank: 14 },
 ];
@@ -1191,6 +1192,157 @@ function RadioTab() {
   );
 }
 
+// ==================== EVENTS MANAGEMENT ====================
+function EventsTab() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [newEvent, setNewEvent] = useState({ name: "", description: "", type: "competition", reward_credits: 0, reward_pixels: 0 });
+
+  const loadEvents = useCallback(async () => {
+    try {
+      const data = await apiGet("/api/housekeeping/events");
+      setEvents(data.events || []);
+    } catch { setEvents([]); }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { loadEvents(); }, [loadEvents]);
+
+  const createEvent = async () => {
+    if (!newEvent.name) return;
+    try {
+      await apiPost("/api/housekeeping/events", newEvent);
+      setMessage("Event created!");
+      setShowCreate(false);
+      setNewEvent({ name: "", description: "", type: "competition", reward_credits: 0, reward_pixels: 0 });
+      loadEvents();
+    } catch (e: any) { setMessage(e.message || "Failed"); }
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const completeEvent = async (eventId: number, winnerId: string) => {
+    if (!winnerId) return;
+    try {
+      await apiPost(`/api/housekeeping/events/${eventId}/complete`, { winner_user_id: parseInt(winnerId) });
+      setMessage("Event completed & winner rewarded!");
+      loadEvents();
+    } catch (e: any) { setMessage(e.message || "Failed"); }
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const deleteEvent = async (eventId: number) => {
+    try {
+      await apiDelete(`/api/housekeeping/events/${eventId}`);
+      setMessage("Event deleted!");
+      loadEvents();
+    } catch (e: any) { setMessage(e.message || "Failed"); }
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  if (loading) return <div className="text-center py-12 text-zinc-400">Loading events...</div>;
+
+  return (
+    <div className="space-y-6">
+      {message && (
+        <div className={`px-4 py-2 rounded text-sm ${message.toLowerCase().includes("fail") ? "bg-red-900/50 text-red-300 border border-red-700" : "bg-emerald-900/50 text-emerald-300 border border-emerald-700"}`}>
+          {message}
+        </div>
+      )}
+
+      {/* Create Event */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+        <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-green-400" />
+            <span className="font-semibold text-sm">Event Management</span>
+          </div>
+          <button onClick={() => setShowCreate(!showCreate)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 rounded text-sm font-medium flex items-center gap-1">
+            <Plus className="w-3.5 h-3.5" /> New Event
+          </button>
+        </div>
+        {showCreate && (
+          <div className="p-4 border-b border-zinc-800 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-zinc-500 block mb-1">Event Name</label>
+                <input value={newEvent.name} onChange={(e) => setNewEvent({...newEvent, name: e.target.value})} placeholder="e.g. Friday Falling Furni" className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white" />
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 block mb-1">Type</label>
+                <select value={newEvent.type} onChange={(e) => setNewEvent({...newEvent, type: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white">
+                  <option value="competition">Competition</option>
+                  <option value="game">Game</option>
+                  <option value="trivia">Trivia</option>
+                  <option value="fashion">Fashion Show</option>
+                  <option value="build">Build Contest</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-zinc-500 block mb-1">Description</label>
+              <textarea value={newEvent.description} onChange={(e) => setNewEvent({...newEvent, description: e.target.value})} placeholder="Describe the event..." className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white h-20 resize-none" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-zinc-500 block mb-1">Reward Credits</label>
+                <input type="number" value={newEvent.reward_credits} onChange={(e) => setNewEvent({...newEvent, reward_credits: parseInt(e.target.value) || 0})} className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white" />
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 block mb-1">Reward Pixels</label>
+                <input type="number" value={newEvent.reward_pixels} onChange={(e) => setNewEvent({...newEvent, reward_pixels: parseInt(e.target.value) || 0})} className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white" />
+              </div>
+            </div>
+            <button onClick={createEvent} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded text-sm font-medium flex items-center gap-1">
+              <Check className="w-4 h-4" /> Create Event
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Events List */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+        <div className="px-4 py-3 border-b border-zinc-800">
+          <span className="font-semibold text-sm">All Events ({events.length})</span>
+        </div>
+        <div className="divide-y divide-zinc-800">
+          {events.length === 0 && (
+            <div className="px-4 py-8 text-center text-zinc-500 text-sm">No events created yet. Click "New Event" to get started!</div>
+          )}
+          {events.map((evt: any) => (
+            <div key={evt.id} className="px-4 py-3 hover:bg-zinc-800/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                    evt.status === "active" ? "bg-emerald-900/50 text-emerald-300" : evt.status === "completed" ? "bg-blue-900/50 text-blue-300" : "bg-zinc-800 text-zinc-400"
+                  }`}>{evt.status}</div>
+                  <div>
+                    <div className="text-sm font-medium text-white">{evt.name}</div>
+                    <div className="text-xs text-zinc-500">{evt.type} | Rewards: {evt.reward_credits} credits, {evt.reward_pixels} pixels</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {evt.status === "active" && (
+                    <div className="flex items-center gap-1">
+                      <input placeholder="Winner User ID" className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white w-28" id={`winner-${evt.id}`} />
+                      <button onClick={() => completeEvent(evt.id, (document.getElementById(`winner-${evt.id}`) as HTMLInputElement)?.value)} className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs font-medium">Complete</button>
+                    </div>
+                  )}
+                  <button onClick={() => deleteEvent(evt.id)} className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                </div>
+              </div>
+              {evt.description && <div className="text-xs text-zinc-500 mt-1">{evt.description}</div>}
+              {evt.winner_username && <div className="text-xs text-amber-400 mt-1">Winner: {evt.winner_username}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SettingsTab() {
   const [siteSettings, setSiteSettings] = useState<Record<string, string>>({});
   const [emuSettings, setEmuSettings] = useState<Record<string, string>>({});
@@ -1368,6 +1520,7 @@ export function HousekeepingPage() {
         {activeTab === "rooms" && <RoomsTab />}
         {activeTab === "modlogs" && <ModLogsTab />}
         {activeTab === "radio" && <RadioTab />}
+        {activeTab === "events" && <EventsTab />}
         {activeTab === "settings" && <SettingsTab />}
       </div>
     </div>

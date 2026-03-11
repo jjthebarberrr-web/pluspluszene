@@ -771,3 +771,123 @@ async def edit_catalog_page(page_id: int, request: Request):
             await conn.commit()
 
     return {"ok": True, "message": "Catalog page updated"}
+
+
+# ==================== EVENTS MANAGEMENT (Rank 8+) ====================
+
+class EventCreateRequest(BaseModel):
+    name: str
+    description: str = ""
+    type: str = "competition"
+    reward_credits: int = 0
+    reward_pixels: int = 0
+
+
+class EventCompleteRequest(BaseModel):
+    winner_user_id: int
+
+
+@router.get("/events")
+async def get_events(request: Request):
+    """List all events - rank 8+"""
+    user = await get_staff_user(request)
+    require_rank(8)(user)
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT e.id, e.name, e.description, e.type, e.status, e.reward_credits, e.reward_pixels, "
+                "e.winner_user_id, e.created_by, e.created_at, e.completed_at, "
+                "w.username as winner_username, c.username as creator_username "
+                "FROM habplus_events e "
+                "LEFT JOIN users w ON e.winner_user_id = w.id "
+                "LEFT JOIN users c ON e.created_by = c.id "
+                "ORDER BY e.created_at DESC"
+            )
+            events = []
+            for r in await cur.fetchall():
+                events.append({
+                    "id": r[0], "name": r[1], "description": r[2], "type": r[3],
+                    "status": r[4], "reward_credits": r[5], "reward_pixels": r[6],
+                    "winner_user_id": r[7], "created_by": r[8], "created_at": r[9],
+                    "completed_at": r[10], "winner_username": r[11], "creator_username": r[12],
+                })
+
+    return {"events": events}
+
+
+@router.post("/events")
+async def create_event(req: EventCreateRequest, request: Request):
+    """Create an event - rank 8+"""
+    user = await get_staff_user(request)
+    require_rank(8)(user)
+
+    now = int(time.time())
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "INSERT INTO habplus_events (name, description, type, status, reward_credits, reward_pixels, created_by, created_at) "
+                "VALUES (%s, %s, %s, 'active', %s, %s, %s, %s)",
+                (req.name, req.description, req.type, req.reward_credits, req.reward_pixels, user["id"], now)
+            )
+        await conn.commit()
+
+    return {"ok": True, "message": "Event created!"}
+
+
+@router.post("/events/{event_id}/complete")
+async def complete_event(event_id: int, req: EventCompleteRequest, request: Request):
+    """Complete an event and reward the winner - rank 8+"""
+    user = await get_staff_user(request)
+    require_rank(8)(user)
+
+    now = int(time.time())
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            # Check event exists and is active
+            await cur.execute("SELECT status, reward_credits, reward_pixels FROM habplus_events WHERE id = %s", (event_id,))
+            evt = await cur.fetchone()
+            if not evt:
+                raise HTTPException(404, "Event not found")
+            if evt[0] != "active":
+                raise HTTPException(400, "Event is not active")
+
+            # Check winner exists
+            await cur.execute("SELECT id, username FROM users WHERE id = %s", (req.winner_user_id,))
+            winner = await cur.fetchone()
+            if not winner:
+                raise HTTPException(404, "Winner user not found")
+
+            # Mark event as completed
+            await cur.execute(
+                "UPDATE habplus_events SET status = 'completed', winner_user_id = %s, completed_at = %s WHERE id = %s",
+                (req.winner_user_id, now, event_id)
+            )
+
+            # Reward the winner
+            if evt[1] > 0:  # credits
+                await cur.execute("UPDATE users SET credits = credits + %s WHERE id = %s", (evt[1], req.winner_user_id))
+            if evt[2] > 0:  # pixels
+                await cur.execute("UPDATE users SET pixels = pixels + %s WHERE id = %s", (evt[2], req.winner_user_id))
+
+        await conn.commit()
+
+    return {"ok": True, "message": f"Event completed! {winner[1]} has been rewarded."}
+
+
+@router.delete("/events/{event_id}")
+async def delete_event(event_id: int, request: Request):
+    """Delete an event - rank 9+"""
+    user = await get_staff_user(request)
+    require_rank(9)(user)
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM habplus_events WHERE id = %s", (event_id,))
+        await conn.commit()
+
+    return {"ok": True, "message": "Event deleted"}
