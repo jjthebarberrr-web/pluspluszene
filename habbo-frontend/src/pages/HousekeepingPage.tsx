@@ -4,7 +4,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from "../api";
 import {
   LayoutDashboard, Users, Shield, Newspaper, DoorOpen, Settings, Gavel,
   Search, ChevronLeft, ChevronRight, Trash2, Edit3, Plus, Eye, Ban,
-  Crown, Activity, TrendingUp, AlertTriangle, X, Check
+  Crown, Activity, TrendingUp, AlertTriangle, X, Check, Radio
 } from "lucide-react";
 import { HabboAvatar } from "../components/HabboAvatar";
 
@@ -19,6 +19,7 @@ const TABS = [
   { id: "bans", label: "Bans", icon: Gavel, minRank: 8 },
   { id: "news", label: "News", icon: Newspaper, minRank: 9 },
   { id: "rooms", label: "Rooms", icon: DoorOpen, minRank: 8 },
+  { id: "radio", label: "Radio / DJs", icon: Radio, minRank: 8 },
   { id: "modlogs", label: "Mod Logs", icon: Shield, minRank: 7 },
   { id: "settings", label: "Settings", icon: Settings, minRank: 10 },
 ];
@@ -963,6 +964,232 @@ function ModLogsTab() {
 }
 
 // ==================== SETTINGS ====================
+// ==================== RADIO / DJ MANAGEMENT ====================
+function RadioTab() {
+  const [managers, setManagers] = useState<any[]>([]);
+  const [djs, setDjs] = useState<any[]>([]);
+  const [currentStatus, setCurrentStatus] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [addUserId, setAddUserId] = useState("");
+  const [addRole, setAddRole] = useState("dj");
+  const [showName, setShowName] = useState("");
+  const [goLiveDjId, setGoLiveDjId] = useState("");
+
+  const loadData = useCallback(async () => {
+    try {
+      const data = await apiGet("/api/radio/djs");
+      setManagers(data.managers);
+      setDjs(data.djs);
+      setCurrentStatus(data.current_status);
+    } catch { }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const addDJ = async () => {
+    if (!addUserId) return;
+    try {
+      const res = await apiPost("/api/radio/add-dj", { user_id: parseInt(addUserId), role: addRole });
+      setMessage(res.message || "DJ added!");
+      setAddUserId("");
+      loadData();
+    } catch (e: any) { setMessage(e.message || "Failed"); }
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const removeDJ = async (userId: number) => {
+    try {
+      const res = await apiPost("/api/radio/remove-dj", { user_id: userId });
+      setMessage(res.message || "DJ removed!");
+      loadData();
+    } catch (e: any) { setMessage(e.message || "Failed"); }
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const goLive = async () => {
+    if (!goLiveDjId) return;
+    try {
+      const res = await apiPost("/api/radio/go-live", { dj_user_id: parseInt(goLiveDjId), show_name: showName });
+      setMessage(res.message || "DJ is live!");
+      setShowName("");
+      loadData();
+    } catch (e: any) { setMessage(e.message || "Failed"); }
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const goOffline = async () => {
+    try {
+      const res = await apiPost("/api/radio/go-offline", {});
+      setMessage(res.message || "Radio offline");
+      loadData();
+    } catch (e: any) { setMessage(e.message || "Failed"); }
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  if (loading) return <div className="text-center py-12 text-zinc-400">Loading radio data...</div>;
+
+  const allDJs = [...managers, ...djs];
+
+  return (
+    <div className="space-y-6">
+      {message && (
+        <div className={`px-4 py-2 rounded text-sm ${message.toLowerCase().includes("fail") || message.toLowerCase().includes("denied") ? "bg-red-900/50 text-red-300 border border-red-700" : "bg-emerald-900/50 text-emerald-300 border border-emerald-700"}`}>
+          {message}
+        </div>
+      )}
+
+      {/* Current Status */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+        <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
+          <Radio className="w-4 h-4 text-rose-400" />
+          <span className="font-semibold text-sm">Radio Status</span>
+          {currentStatus.is_live && (
+            <span className="ml-auto text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold uppercase animate-pulse">LIVE</span>
+          )}
+        </div>
+        <div className="p-4">
+          {currentStatus.is_live ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-sm text-white">Currently Live: <strong>DJ #{currentStatus.current_dj_id}</strong></span>
+                {currentStatus.show_name && <span className="text-xs text-zinc-400">— {currentStatus.show_name}</span>}
+              </div>
+              <button onClick={goOffline} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded text-sm font-medium">
+                Take Offline
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-zinc-600 rounded-full" />
+              <span className="text-sm text-zinc-400">Radio is currently off air</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Go Live Controls */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+        <div className="px-4 py-3 border-b border-zinc-800">
+          <span className="font-semibold text-sm">Set DJ Live</span>
+        </div>
+        <div className="p-4 flex flex-wrap gap-3 items-end">
+          <div>
+            <label className="text-xs text-zinc-500 block mb-1">Select DJ</label>
+            <select
+              value={goLiveDjId}
+              onChange={(e) => setGoLiveDjId(e.target.value)}
+              className="bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white min-w-48"
+            >
+              <option value="">Choose a DJ...</option>
+              {allDJs.filter(d => d.status === "active").map((d) => (
+                <option key={d.user_id} value={d.user_id}>{d.username} ({d.role === "dj_manager" ? "Manager" : "DJ"})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-500 block mb-1">Show Name (optional)</label>
+            <input
+              value={showName}
+              onChange={(e) => setShowName(e.target.value)}
+              placeholder="e.g. Evening Vibes"
+              className="bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white w-48"
+            />
+          </div>
+          <button onClick={goLive} className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 rounded text-sm font-medium">
+            Go Live
+          </button>
+        </div>
+      </div>
+
+      {/* DJ Roster */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Managers */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+          <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
+            <Crown className="w-4 h-4 text-amber-400" />
+            <span className="font-semibold text-sm">DJ Managers ({managers.length})</span>
+          </div>
+          <div className="divide-y divide-zinc-800">
+            {managers.length === 0 && <div className="px-4 py-6 text-center text-zinc-500 text-sm">No DJ Managers yet</div>}
+            {managers.map((m) => (
+              <div key={m.id} className="px-4 py-3 flex items-center gap-3 hover:bg-zinc-800/50">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-800 flex-shrink-0">
+                  <HabboAvatar look={m.look} size="small" headOnly />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white">{m.username}</div>
+                  <div className="text-xs text-amber-400">DJ Manager</div>
+                </div>
+                <span className={`w-2 h-2 rounded-full ${m.online ? "bg-emerald-500" : "bg-zinc-600"}`} />
+                <button onClick={() => removeDJ(m.user_id)} className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* DJs */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+          <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
+            <Radio className="w-4 h-4 text-rose-400" />
+            <span className="font-semibold text-sm">DJs ({djs.length})</span>
+          </div>
+          <div className="divide-y divide-zinc-800">
+            {djs.length === 0 && <div className="px-4 py-6 text-center text-zinc-500 text-sm">No DJs yet</div>}
+            {djs.map((d) => (
+              <div key={d.id} className="px-4 py-3 flex items-center gap-3 hover:bg-zinc-800/50">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-800 flex-shrink-0">
+                  <HabboAvatar look={d.look} size="small" headOnly />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white">{d.username}</div>
+                  <div className="text-xs text-rose-400">DJ</div>
+                </div>
+                <span className={`w-2 h-2 rounded-full ${d.online ? "bg-emerald-500" : "bg-zinc-600"}`} />
+                <button onClick={() => removeDJ(d.user_id)} className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Add DJ */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+        <div className="px-4 py-3 border-b border-zinc-800">
+          <span className="font-semibold text-sm">Add DJ / DJ Manager</span>
+        </div>
+        <div className="p-4 flex flex-wrap gap-3 items-end">
+          <div>
+            <label className="text-xs text-zinc-500 block mb-1">User ID</label>
+            <input
+              value={addUserId}
+              onChange={(e) => setAddUserId(e.target.value)}
+              placeholder="Enter user ID"
+              className="bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white w-36"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-zinc-500 block mb-1">Role</label>
+            <select
+              value={addRole}
+              onChange={(e) => setAddRole(e.target.value)}
+              className="bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white"
+            >
+              <option value="dj">DJ</option>
+              <option value="dj_manager">DJ Manager</option>
+            </select>
+          </div>
+          <button onClick={addDJ} className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-sm font-medium flex items-center gap-1">
+            <Plus className="w-3.5 h-3.5" /> Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SettingsTab() {
   const [siteSettings, setSiteSettings] = useState<Record<string, string>>({});
   const [emuSettings, setEmuSettings] = useState<Record<string, string>>({});
@@ -1139,6 +1366,7 @@ export function HousekeepingPage() {
         {activeTab === "news" && <NewsTab />}
         {activeTab === "rooms" && <RoomsTab />}
         {activeTab === "modlogs" && <ModLogsTab />}
+        {activeTab === "radio" && <RadioTab />}
         {activeTab === "settings" && <SettingsTab />}
       </div>
     </div>

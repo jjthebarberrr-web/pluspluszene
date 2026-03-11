@@ -3,7 +3,7 @@ import { apiGet, apiPost, isLoggedIn } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 import {
   Crown, Shield, Landmark, Scale, Users, UserCheck, Vote,
-  Scroll, Gavel, Star, Building2, Award, ArrowDown
+  Scroll, Gavel, Star, Building2, Award, ArrowDown, Radio, Headphones
 } from "lucide-react";
 
 interface StaffMember {
@@ -78,6 +78,7 @@ const rankSmallIcons: Record<string, React.ReactNode> = {
 export function StaffPage() {
   const [staffGroups, setStaffGroups] = useState<StaffGroup[]>([]);
   const [elections, setElections] = useState<Election[]>([]);
+  const [radioDJs, setRadioDJs] = useState<{managers: any[], djs: any[], current_status: any}>({managers: [], djs: [], current_status: {}});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"hierarchy" | "elections">("hierarchy");
   const [votingMessage, setVotingMessage] = useState("");
@@ -88,6 +89,7 @@ export function StaffPage() {
         setStaffGroups(data.groups);
       }),
       apiGet("/api/staff/elections").then((data) => setElections(data.elections)).catch(() => {}),
+      apiGet("/api/radio/djs").then((data) => setRadioDJs(data)).catch(() => {}),
     ])
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -308,6 +310,74 @@ export function StaffPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            {/* Radio / DJ Department */}
+            <div className="rounded-lg overflow-hidden border border-zinc-800">
+              <div className="bg-gradient-to-r from-rose-700 to-pink-600 px-4 py-2.5 flex items-center gap-2">
+                <Radio className="w-4 h-4 text-white" />
+                <span className="font-bold text-white text-sm">HabPlus Radio</span>
+                {radioDJs.current_status?.is_live && (
+                  <span className="ml-auto text-[9px] bg-red-500/30 text-red-200 px-1.5 py-0.5 rounded font-bold uppercase animate-pulse">LIVE</span>
+                )}
+              </div>
+              <div className="bg-zinc-900 p-4 border border-zinc-800 border-t-0 space-y-3">
+                {/* Current Status */}
+                <div className="flex items-center gap-2">
+                  <div className={`w-2.5 h-2.5 rounded-full ${radioDJs.current_status?.is_live ? "bg-red-500 animate-pulse" : "bg-zinc-600"}`} />
+                  <span className="text-xs text-zinc-400">
+                    {radioDJs.current_status?.is_live ? "On Air Now" : "Off Air"}
+                  </span>
+                </div>
+
+                {/* DJ Managers */}
+                {radioDJs.managers.length > 0 && (
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wider text-amber-400 font-bold mb-1.5 flex items-center gap-1">
+                      <Crown className="w-3 h-3" /> DJ Managers
+                    </div>
+                    <div className="space-y-1.5">
+                      {radioDJs.managers.map((m: any) => (
+                        <div key={m.user_id} className="flex items-center gap-2 bg-zinc-800/50 rounded px-2 py-1.5">
+                          <div className="w-6 h-6 rounded-full overflow-hidden bg-zinc-700 flex-shrink-0">
+                            <HabboAvatar look={m.look} size="small" headOnly />
+                          </div>
+                          <span className="text-xs font-medium text-white">{m.username}</span>
+                          <span className={`ml-auto w-2 h-2 rounded-full ${m.online ? "bg-emerald-500" : "bg-zinc-600"}`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* DJs */}
+                {radioDJs.djs.length > 0 && (
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wider text-rose-400 font-bold mb-1.5 flex items-center gap-1">
+                      <Headphones className="w-3 h-3" /> DJs
+                    </div>
+                    <div className="space-y-1.5">
+                      {radioDJs.djs.map((d: any) => (
+                        <div key={d.user_id} className="flex items-center gap-2 bg-zinc-800/50 rounded px-2 py-1.5">
+                          <div className="w-6 h-6 rounded-full overflow-hidden bg-zinc-700 flex-shrink-0">
+                            <HabboAvatar look={d.look} size="small" headOnly />
+                          </div>
+                          <span className="text-xs font-medium text-white">{d.username}</span>
+                          <span className={`ml-auto w-2 h-2 rounded-full ${d.online ? "bg-emerald-500" : "bg-zinc-600"}`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {radioDJs.managers.length === 0 && radioDJs.djs.length === 0 && (
+                  <p className="text-xs text-zinc-500 text-center py-2">No DJs assigned yet</p>
+                )}
+
+                <p className="text-[11px] text-zinc-600 leading-relaxed">
+                  The Radio department is managed by DJ Managers appointed by senior staff. DJs are elected and managed through the staff system.
+                </p>
               </div>
             </div>
 

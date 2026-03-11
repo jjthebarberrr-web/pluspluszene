@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiGet, isLoggedIn } from "../api";
-import { Loader2, AlertCircle, Users, UserPlus, Minus, Plus, GripHorizontal } from "lucide-react";
+import { Loader2, AlertCircle, Users, UserPlus, Minus, Plus, GripHorizontal, Radio } from "lucide-react";
 import { HabboAvatar } from "@/components/HabboAvatar";
 
 const NITRO_CLIENT_URL = import.meta.env.VITE_NITRO_URL || "";
@@ -12,6 +12,18 @@ interface NewestUser {
   look: string;
 }
 
+interface RadioDJ {
+  id: number;
+  username: string;
+  look: string;
+}
+
+interface RadioStatus {
+  is_live: boolean;
+  dj: RadioDJ | null;
+  show_name: string;
+}
+
 export function ClientPage() {
   const navigate = useNavigate();
   const [ssoTicket, setSsoTicket] = useState("");
@@ -19,6 +31,7 @@ export function ClientPage() {
   const [error, setError] = useState("");
   const [onlineCount, setOnlineCount] = useState(0);
   const [newestUser, setNewestUser] = useState<NewestUser | null>(null);
+  const [radioStatus, setRadioStatus] = useState<RadioStatus>({ is_live: false, dj: null, show_name: "" });
   const [minimized, setMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 12, y: 12 });
   const dragging = useRef(false);
@@ -33,16 +46,19 @@ export function ClientPage() {
     generateSSO();
   }, [navigate]);
 
-  // Fetch online count + newest user
+  // Fetch online count + newest user + radio status
   useEffect(() => {
     const fetchData = () => {
       apiGet("/api/home").then((data) => {
         if (data.online_count !== undefined) setOnlineCount(data.online_count);
         if (data.newest_user) setNewestUser(data.newest_user);
       }).catch(() => {});
+      apiGet("/api/radio/current").then((data) => {
+        setRadioStatus(data);
+      }).catch(() => {});
     };
     fetchData();
-    const interval = setInterval(fetchData, 5000);
+    const interval = setInterval(fetchData, 8000);
     return () => clearInterval(interval);
   }, []);
 
@@ -173,13 +189,43 @@ export function ClientPage() {
             {newestUser && (
               <div className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-purple-400" />
-                <span className="text-xs text-zinc-400">Newest User:</span>
+                <span className="text-xs text-zinc-400">Newest:</span>
                 <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style={{ border: '2px solid rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.08)' }}>
                   <HabboAvatar look={newestUser.look} size="small" headOnly={true} />
                 </div>
                 <span className="text-xs font-bold text-white">{newestUser.username}</span>
               </div>
             )}
+
+            {/* Radio Section */}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px', marginTop: '2px' }}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Radio className="w-3.5 h-3.5 text-rose-400" />
+                <span className="text-[10px] uppercase tracking-wider text-rose-400 font-bold">HabPlus Radio</span>
+              </div>
+              {radioStatus.is_live && radioStatus.dj ? (
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style={{ border: '2px solid rgba(239,68,68,0.6)', background: 'rgba(255,255,255,0.08)' }}>
+                      <HabboAvatar look={radioStatus.dj.look} size="small" headOnly={true} />
+                    </div>
+                    <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-black animate-pulse" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-white truncate">{radioStatus.dj.username}</div>
+                    {radioStatus.show_name && (
+                      <div className="text-[10px] text-zinc-400 truncate">{radioStatus.show_name}</div>
+                    )}
+                  </div>
+                  <span className="text-[9px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold uppercase ml-auto">Live</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-zinc-600 rounded-full" />
+                  <span className="text-[11px] text-zinc-500">Off Air</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
