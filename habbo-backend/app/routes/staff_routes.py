@@ -5,13 +5,18 @@ from app.database import get_pool
 
 router = APIRouter(prefix="/api/staff", tags=["staff"])
 
-# Government-style rank hierarchy (ranks 6-10 are staff)
+# Government-style rank hierarchy (ranks 6-15 are staff)
 RANK_META = {
-    10: {"name": "President", "description": "Supreme leader of the hotel. Sets the vision, makes executive decisions, and represents the community.", "icon": "crown", "color": "from-yellow-600 to-amber-500"},
-    9: {"name": "Vice President", "description": "Second in command. Assists the President and steps in when they're away. Oversees daily operations.", "icon": "shield", "color": "from-red-700 to-red-500"},
-    8: {"name": "Governor", "description": "Regional leaders who manage specific areas of the hotel. Enforce policies and manage events.", "icon": "landmark", "color": "from-purple-700 to-purple-500"},
-    7: {"name": "Senator", "description": "Elected officials who propose and vote on hotel policies. Voice of the community.", "icon": "scale", "color": "from-blue-700 to-blue-500"},
-    6: {"name": "Representative", "description": "Community-elected members who represent player interests and moderate discussions.", "icon": "users", "color": "from-emerald-700 to-emerald-500"},
+    15: {"name": "Elite", "description": "System developers and owners. Full control over the hotel infrastructure, catalog, permissions, and updates.", "icon": "code", "color": "from-violet-700 to-purple-500"},
+    14: {"name": "President", "description": "Supreme public leader of the hotel. Sets the vision, makes executive decisions, and represents the community.", "icon": "crown", "color": "from-yellow-600 to-amber-500"},
+    13: {"name": "Vice President", "description": "Second in command. Assists the President and steps in when they're away. Oversees daily operations.", "icon": "shield", "color": "from-red-700 to-red-500"},
+    12: {"name": "Governor", "description": "Regional leaders who manage specific areas of the hotel. Enforce policies and manage events.", "icon": "landmark", "color": "from-purple-700 to-purple-500"},
+    11: {"name": "Senator", "description": "Elected officials who propose and vote on hotel policies. Voice of the community.", "icon": "scale", "color": "from-blue-700 to-blue-500"},
+    10: {"name": "Representative", "description": "Community-elected staff members who represent player interests and moderate discussions.", "icon": "users", "color": "from-emerald-700 to-emerald-500"},
+    9: {"name": "Event Manager", "description": "Oversees all hotel events, coordinates the event team, and approves event proposals.", "icon": "calendar", "color": "from-green-700 to-green-500"},
+    8: {"name": "Event", "description": "Organizes and hosts in-game events, competitions, and community activities.", "icon": "party", "color": "from-lime-700 to-lime-500"},
+    7: {"name": "DJ Manager", "description": "Manages the radio DJ team, schedules shows, and oversees broadcast quality.", "icon": "headphones", "color": "from-pink-700 to-pink-500"},
+    6: {"name": "DJ", "description": "Radio DJs who host live shows and entertain the community with music.", "icon": "radio", "color": "from-rose-700 to-rose-500"},
 }
 
 
@@ -82,9 +87,9 @@ async def get_staff():
             except Exception:
                 pass
 
-            # Get all staff members (ranks 6-10)
+            # Get all staff members (ranks 6-15)
             await cur.execute(
-                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` >= 6 AND `rank` <= 10 ORDER BY `rank` DESC, username ASC"
+                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` >= 6 AND `rank` <= 15 ORDER BY `rank` DESC, username ASC"
             )
             staff_rows = await cur.fetchall()
 
@@ -121,8 +126,8 @@ async def get_staff():
             "online": row[5],
         })
 
-    # Ensure all ranks 6-10 are shown even if empty
-    for r in range(10, 5, -1):
+    # Ensure all ranks 6-15 are shown even if empty
+    for r in range(15, 5, -1):
         if r not in groups_map:
             meta = RANK_META.get(r, {"name": f"Rank {r}", "description": "", "icon": "user", "color": "from-zinc-700 to-zinc-500"})
             rname = rank_names.get(r, meta["name"])

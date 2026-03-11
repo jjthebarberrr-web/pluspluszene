@@ -147,9 +147,9 @@ async def _get_user_rank(pool, user_id: int) -> int:
 
 
 async def _is_dj_manager(pool, user_id: int) -> bool:
-    """Check if user is a DJ Manager or staff rank 8+"""
+    """Check if user is a DJ Manager or staff rank 7+"""
     rank = await _get_user_rank(pool, user_id)
-    if rank >= 8:  # Governor+ can manage DJs
+    if rank >= 7:  # DJ Manager+ can manage DJs
         return True
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:

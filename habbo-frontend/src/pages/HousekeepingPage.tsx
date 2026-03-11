@@ -9,19 +9,20 @@ import {
 import { HabboAvatar } from "../components/HabboAvatar";
 
 const RANK_NAMES: Record<number, string> = {
-  10: "President", 9: "Vice President", 8: "Governor", 7: "Senator", 6: "Representative",
-  5: "VIP Diamond", 4: "VIP Gold", 3: "VIP Silver", 2: "VIP Bronze", 1: "Citizen",
+  15: "Elite", 14: "President", 13: "Vice President", 12: "Governor", 11: "Senator",
+  10: "Representative", 9: "Event Manager", 8: "Event", 7: "DJ Manager", 6: "DJ",
+  5: "VIP Diamond", 4: "VIP Gold", 3: "VIP Silver", 2: "VIP Bronze", 1: "Member",
 };
 
 const TABS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, minRank: 6 },
-  { id: "users", label: "Users", icon: Users, minRank: 8 },
-  { id: "bans", label: "Bans", icon: Gavel, minRank: 8 },
-  { id: "news", label: "News", icon: Newspaper, minRank: 9 },
-  { id: "rooms", label: "Rooms", icon: DoorOpen, minRank: 8 },
-  { id: "radio", label: "Radio / DJs", icon: Radio, minRank: 8 },
-  { id: "modlogs", label: "Mod Logs", icon: Shield, minRank: 7 },
-  { id: "settings", label: "Settings", icon: Settings, minRank: 10 },
+  { id: "users", label: "Users", icon: Users, minRank: 11 },
+  { id: "bans", label: "Bans", icon: Gavel, minRank: 11 },
+  { id: "news", label: "News", icon: Newspaper, minRank: 12 },
+  { id: "rooms", label: "Rooms", icon: DoorOpen, minRank: 11 },
+  { id: "radio", label: "Radio / DJs", icon: Radio, minRank: 7 },
+  { id: "modlogs", label: "Mod Logs", icon: Shield, minRank: 10 },
+  { id: "settings", label: "Settings", icon: Settings, minRank: 14 },
 ];
 
 // ==================== DASHBOARD ====================
@@ -245,7 +246,7 @@ function UsersTab({ userRank }: { userRank: number }) {
                   />
                 </div>
               )}
-              {userRank >= 9 && (
+              {userRank >= 13 && (
                 <>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-zinc-500">IP Current</span>
@@ -278,7 +279,7 @@ function UsersTab({ userRank }: { userRank: number }) {
                       />
                     </div>
                   ))}
-                  {userRank >= 10 && (
+                  {userRank >= 14 && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-zinc-500">Rank</span>
                       <select

@@ -9,11 +9,16 @@ from app.auth import decode_token
 router = APIRouter(prefix="/api/housekeeping", tags=["housekeeping"])
 
 # Rank permission levels:
-# 6 (Representative): Dashboard, view logs
-# 7 (Senator): + Moderation (mute, view reports)
-# 8 (Governor): + User mgmt (search/edit/ban), Room mgmt
-# 9 (Vice President): + News mgmt (create/edit/delete)
-# 10 (President): Full access - settings, rank mgmt
+# 6 (DJ): Dashboard only
+# 7 (DJ Manager): Dashboard only
+# 8 (Event): Dashboard only
+# 9 (Event Manager): Dashboard only
+# 10 (Representative): + Moderation (mute, view reports)
+# 11 (Senator): + User mgmt (search/edit/ban), Room mgmt
+# 12 (Governor): + News mgmt (create/edit/delete), Catalog mgmt
+# 13 (Vice President): + Ban mgmt, Room deletion
+# 14 (President): Full staff access - settings, rank mgmt (no dev commands)
+# 15 (Elite): Full access - dev commands, system updates
 
 MIN_STAFF_RANK = 6
 
@@ -161,9 +166,9 @@ class BanRequest(BaseModel):
 
 @router.get("/users")
 async def search_users(request: Request, q: str = "", page: int = 1, search_type: str = "username"):
-    """Search users - rank 8+"""
+    """Search users - rank 11+"""
     user = await get_staff_user(request)
-    require_rank(8)(user)
+    require_rank(11)(user)
 
     pool = await get_pool()
     limit = 20
@@ -193,7 +198,7 @@ async def search_users(request: Request, q: str = "", page: int = 1, search_type
                     "id": r[0], "username": r[1], "email": r[2], "look": r[3],
                     "motto": r[4], "rank": r[5], "online": r[6],
                     "account_created": r[7], "last_login": r[8],
-                    "ip": r[9] if user["rank"] >= 9 else "hidden",
+                    "ip": r[9] if user["rank"] >= 13 else "hidden",
                 })
 
             # Get total count
@@ -211,9 +216,9 @@ async def search_users(request: Request, q: str = "", page: int = 1, search_type
 
 @router.get("/users/{user_id}")
 async def get_user_detail(user_id: int, request: Request):
-    """Get detailed user info - rank 8+"""
+    """Get detailed user info - rank 11+"""
     user = await get_staff_user(request)
-    require_rank(8)(user)
+    require_rank(11)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -233,9 +238,9 @@ async def get_user_detail(user_id: int, request: Request):
                 "look": r[4], "motto": r[5], "rank": r[6], "online": r[7],
                 "gender": r[8], "account_created": r[9], "last_login": r[10],
                 "last_online": r[11], "credits": r[12], "pixels": r[13],
-                "ip_register": r[14] if user["rank"] >= 9 else "hidden",
-                "ip_current": r[15] if user["rank"] >= 9 else "hidden",
-                "machine_id": r[16] if user["rank"] >= 9 else "hidden",
+                "ip_register": r[14] if user["rank"] >= 13 else "hidden",
+                "ip_current": r[15] if user["rank"] >= 13 else "hidden",
+                "machine_id": r[16] if user["rank"] >= 13 else "hidden",
                 "home_room": r[17],
             }
 
@@ -276,9 +281,9 @@ async def get_user_detail(user_id: int, request: Request):
 
 @router.put("/users/{user_id}")
 async def edit_user(user_id: int, req: UserEditRequest, request: Request):
-    """Edit user - rank 8+"""
+    """Edit user - rank 11+"""
     user = await get_staff_user(request)
-    require_rank(8)(user)
+    require_rank(11)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -303,8 +308,8 @@ async def edit_user(user_id: int, req: UserEditRequest, request: Request):
                 updates.append("pixels = %s")
                 params.append(req.pixels)
             if req.rank is not None:
-                # Only President can change ranks
-                require_rank(10)(user)
+                # Only President+ can change ranks
+                require_rank(14)(user)
                 if req.rank >= user["rank"]:
                     raise HTTPException(403, "Cannot set rank equal to or higher than your own")
                 updates.append("`rank` = %s")
@@ -326,13 +331,13 @@ async def edit_user(user_id: int, req: UserEditRequest, request: Request):
     return {"ok": True, "message": "User updated successfully"}
 
 
-# ==================== BAN MANAGEMENT (Rank 8+) ====================
+# ==================== BAN MANAGEMENT (Rank 11+) ====================
 
 @router.post("/bans")
 async def ban_user(req: BanRequest, request: Request):
-    """Ban a user - rank 8+"""
+    """Ban a user - rank 11+"""
     user = await get_staff_user(request)
-    require_rank(8)(user)
+    require_rank(11)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -366,9 +371,9 @@ async def ban_user(req: BanRequest, request: Request):
 
 @router.get("/bans")
 async def get_bans(request: Request, page: int = 1, q: str = ""):
-    """List bans - rank 8+"""
+    """List bans - rank 11+"""
     user = await get_staff_user(request)
-    require_rank(8)(user)
+    require_rank(11)(user)
 
     pool = await get_pool()
     limit = 20
@@ -397,7 +402,7 @@ async def get_bans(request: Request, page: int = 1, q: str = ""):
             bans = []
             for r in await cur.fetchall():
                 bans.append({
-                    "id": r[0], "user_id": r[1], "ip": r[2] if user["rank"] >= 9 else "hidden",
+                    "id": r[0], "user_id": r[1], "ip": r[2] if user["rank"] >= 13 else "hidden",
                     "staff_id": r[3], "timestamp": r[4], "ban_expire": r[5],
                     "reason": r[6], "type": r[7],
                     "banned_user": r[8] or "Unknown",
@@ -419,9 +424,9 @@ async def get_bans(request: Request, page: int = 1, q: str = ""):
 
 @router.delete("/bans/{ban_id}")
 async def unban_user(ban_id: int, request: Request):
-    """Remove a ban - rank 8+"""
+    """Remove a ban - rank 11+"""
     user = await get_staff_user(request)
-    require_rank(8)(user)
+    require_rank(11)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -432,7 +437,7 @@ async def unban_user(ban_id: int, request: Request):
     return {"ok": True, "message": "Ban removed"}
 
 
-# ==================== NEWS MANAGEMENT (Rank 9+) ====================
+# ==================== NEWS MANAGEMENT (Rank 12+) ====================
 
 class NewsCreateRequest(BaseModel):
     title: str
@@ -450,9 +455,9 @@ class NewsEditRequest(BaseModel):
 
 @router.get("/news")
 async def get_news_admin(request: Request, page: int = 1):
-    """List all news articles - rank 9+"""
+    """List all news articles - rank 12+"""
     user = await get_staff_user(request)
-    require_rank(9)(user)
+    require_rank(12)(user)
 
     pool = await get_pool()
     limit = 20
@@ -480,9 +485,9 @@ async def get_news_admin(request: Request, page: int = 1):
 
 @router.post("/news")
 async def create_news(req: NewsCreateRequest, request: Request):
-    """Create news article - rank 9+"""
+    """Create news article - rank 12+"""
     user = await get_staff_user(request)
-    require_rank(9)(user)
+    require_rank(12)(user)
 
     if not req.title.strip() or not req.content.strip():
         raise HTTPException(400, "Title and content are required")
@@ -502,9 +507,9 @@ async def create_news(req: NewsCreateRequest, request: Request):
 
 @router.put("/news/{article_id}")
 async def edit_news(article_id: int, req: NewsEditRequest, request: Request):
-    """Edit news article - rank 9+"""
+    """Edit news article - rank 12+"""
     user = await get_staff_user(request)
-    require_rank(9)(user)
+    require_rank(12)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -543,9 +548,9 @@ async def edit_news(article_id: int, req: NewsEditRequest, request: Request):
 
 @router.delete("/news/{article_id}")
 async def delete_news(article_id: int, request: Request):
-    """Delete news article - rank 9+"""
+    """Delete news article - rank 12+"""
     user = await get_staff_user(request)
-    require_rank(9)(user)
+    require_rank(12)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -559,13 +564,13 @@ async def delete_news(article_id: int, request: Request):
     return {"ok": True, "message": "Article deleted"}
 
 
-# ==================== ROOM MANAGEMENT (Rank 8+) ====================
+# ==================== ROOM MANAGEMENT (Rank 11+) ====================
 
 @router.get("/rooms")
 async def get_rooms(request: Request, page: int = 1, q: str = ""):
-    """List/search rooms - rank 8+"""
+    """List/search rooms - rank 11+"""
     user = await get_staff_user(request)
-    require_rank(8)(user)
+    require_rank(11)(user)
 
     pool = await get_pool()
     limit = 20
@@ -609,9 +614,9 @@ async def get_rooms(request: Request, page: int = 1, q: str = ""):
 
 @router.delete("/rooms/{room_id}")
 async def delete_room(room_id: int, request: Request):
-    """Delete a room - rank 9+"""
+    """Delete a room - rank 13+"""
     user = await get_staff_user(request)
-    require_rank(9)(user)
+    require_rank(13)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -622,13 +627,13 @@ async def delete_room(room_id: int, request: Request):
     return {"ok": True, "message": "Room deleted"}
 
 
-# ==================== MODERATION LOG (Rank 7+) ====================
+# ==================== MODERATION LOG (Rank 10+) ====================
 
 @router.get("/modlogs")
 async def get_mod_logs(request: Request, page: int = 1):
-    """Get moderation logs - rank 7+"""
+    """Get moderation logs - rank 10+"""
     user = await get_staff_user(request)
-    require_rank(7)(user)
+    require_rank(10)(user)
 
     pool = await get_pool()
     limit = 30
@@ -663,7 +668,7 @@ async def get_mod_logs(request: Request, page: int = 1):
     return {"logs": logs, "total": total, "page": page, "pages": max(1, (total + limit - 1) // limit)}
 
 
-# ==================== SITE SETTINGS (Rank 10 only) ====================
+# ==================== SITE SETTINGS (Rank 14+ / President+) ====================
 
 class SettingUpdateRequest(BaseModel):
     key: str
@@ -672,9 +677,9 @@ class SettingUpdateRequest(BaseModel):
 
 @router.get("/settings")
 async def get_settings(request: Request):
-    """Get site settings - rank 10 only"""
+    """Get site settings - rank 14+ (President+)"""
     user = await get_staff_user(request)
-    require_rank(10)(user)
+    require_rank(14)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -698,9 +703,9 @@ async def get_settings(request: Request):
 
 @router.put("/settings")
 async def update_setting(req: SettingUpdateRequest, request: Request):
-    """Update a site setting - rank 10 only"""
+    """Update a site setting - rank 14+ (President+)"""
     user = await get_staff_user(request)
-    require_rank(10)(user)
+    require_rank(14)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -714,13 +719,13 @@ async def update_setting(req: SettingUpdateRequest, request: Request):
     return {"ok": True, "message": "Setting updated"}
 
 
-# ==================== CATALOG MANAGEMENT (Rank 9+) ====================
+# ==================== CATALOG MANAGEMENT (Rank 12+) ====================
 
 @router.get("/catalog")
 async def get_catalog_pages(request: Request, parent_id: int = -1):
-    """Get catalog pages - rank 9+"""
+    """Get catalog pages - rank 12+"""
     user = await get_staff_user(request)
-    require_rank(9)(user)
+    require_rank(12)(user)
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -743,9 +748,9 @@ async def get_catalog_pages(request: Request, parent_id: int = -1):
 
 @router.put("/catalog/pages/{page_id}")
 async def edit_catalog_page(page_id: int, request: Request):
-    """Edit catalog page - rank 9+"""
+    """Edit catalog page - rank 12+"""
     user = await get_staff_user(request)
-    require_rank(9)(user)
+    require_rank(12)(user)
 
     body = await request.json()
     pool = await get_pool()
