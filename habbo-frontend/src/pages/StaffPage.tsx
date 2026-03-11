@@ -90,7 +90,9 @@ export function StaffPage() {
   useEffect(() => {
     Promise.all([
       apiGet("/api/staff").then((data) => {
-        setStaffGroups(data.groups);
+        // Only show government officials (rank 10+), DJs and Events have their own pages
+        const govGroups = data.groups.filter((g: StaffGroup) => g.rank >= 10);
+        setStaffGroups(govGroups);
       }),
       apiGet("/api/staff/elections").then((data) => setElections(data.elections)).catch(() => {}),
     ])
