@@ -87,9 +87,9 @@ async def get_staff():
             except Exception:
                 pass
 
-            # Get all staff members (ranks 6-15)
+            # Get all staff members (ranks 6-14, Elite rank 15 is hidden)
             await cur.execute(
-                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` >= 6 AND `rank` <= 15 ORDER BY `rank` DESC, username ASC"
+                "SELECT id, username, look, motto, `rank`, online FROM users WHERE `rank` >= 6 AND `rank` <= 14 ORDER BY `rank` DESC, username ASC"
             )
             staff_rows = await cur.fetchall()
 
@@ -126,8 +126,8 @@ async def get_staff():
             "online": row[5],
         })
 
-    # Ensure all ranks 6-15 are shown even if empty
-    for r in range(15, 5, -1):
+    # Ensure all ranks 6-14 are shown even if empty (Elite rank 15 is hidden)
+    for r in range(14, 5, -1):
         if r not in groups_map:
             meta = RANK_META.get(r, {"name": f"Rank {r}", "description": "", "icon": "user", "color": "from-zinc-700 to-zinc-500"})
             rname = rank_names.get(r, meta["name"])
