@@ -25,6 +25,7 @@ import { PostDetailPage } from "./pages/PostDetailPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { NewsArticlePage } from "./pages/NewsArticlePage";
+import { BattlePassPage } from "./pages/BattlePassPage";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/room/:roomId" element={<RoomPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/battlepass" element={<BattlePassPage />} />
           <Route path="/client" element={<ClientPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
