@@ -98,6 +98,42 @@ async def get_news(page: int = 1, category: str = "all", db=Depends(get_db)):
     return {"articles": articles}
 
 
+@router.get("/article/{article_id}")
+async def get_article(article_id: int):
+    """Get a single news article by ID with full content."""
+    await _ensure_news_tables()
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT n.id, n.title, n.content, n.image_url, n.author, n.category, n.created_at, COALESCE(u.look, '') as author_look "
+                "FROM news n LEFT JOIN users u ON u.username = n.author WHERE n.id = %s",
+                (article_id,)
+            )
+            row = await cur.fetchone()
+            if not row:
+                raise HTTPException(404, "Article not found")
+
+            article = {
+                "id": row[0], "title": row[1], "content": row[2],
+                "image_url": row[3], "author": row[4], "category": row[5],
+                "created_at": row[6], "author_look": row[7],
+            }
+
+            # Get reactions
+            await cur.execute(
+                "SELECT emoji, COUNT(*) as cnt FROM news_reactions WHERE article_id=%s GROUP BY emoji",
+                (article_id,)
+            )
+            article["reactions"] = {r[0]: r[1] for r in await cur.fetchall()}
+
+            # Get comment count
+            await cur.execute("SELECT COUNT(*) FROM news_comments WHERE article_id=%s", (article_id,))
+            article["comment_count"] = (await cur.fetchone())[0]
+
+    return {"article": article}
+
+
 @router.get("/latest")
 async def get_latest_news(db=Depends(get_db)):
     conn, cur = db

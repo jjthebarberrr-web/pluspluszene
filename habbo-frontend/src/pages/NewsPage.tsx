@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { apiGet, apiPost, isLoggedIn } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 
@@ -441,7 +442,7 @@ export function NewsPage() {
                 }} />
                 {/* Details */}
                 <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
-                  <div style={{
+                  <Link to={`/news/${article.id}`} style={{
                     fontSize: "13px",
                     fontWeight: "600",
                     color: "#ddd",
@@ -449,9 +450,10 @@ export function NewsPage() {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
+                    textDecoration: "none",
                   }}>
                     {article.title}
-                  </div>
+                  </Link>
                   <div style={{ fontSize: "11px", color: "#777", marginTop: "4px" }}>
                     {formatDate(article.created_at)}
                   </div>

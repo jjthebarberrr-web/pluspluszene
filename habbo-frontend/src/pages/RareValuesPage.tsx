@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { apiGet } from "../api";
 import { Gem, TrendingUp, TrendingDown, Minus, Search, Package } from "lucide-react";
 
 interface RareItem {
@@ -12,9 +13,23 @@ interface RareItem {
 }
 
 export function RareValuesPage() {
-  const [items] = useState<RareItem[]>([]);
+  const [items, setItems] = useState<RareItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (activeCategory !== "all") params.set("category", activeCategory);
+    if (searchQuery) params.set("search", searchQuery);
+    apiGet(`/api/rare-items?${params.toString()}`)
+      .then((data) => {
+        setItems(data.items || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [activeCategory, searchQuery]);
 
   const categories = [
     { key: "all", label: "All Items" },
@@ -29,6 +44,14 @@ export function RareValuesPage() {
     if (trend === "down") return <TrendingDown className="w-4 h-4 text-red-400" />;
     return <Minus className="w-4 h-4 text-zinc-500" />;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

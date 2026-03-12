@@ -24,6 +24,7 @@ import { HelpPage } from "./pages/HelpPage";
 import { PostDetailPage } from "./pages/PostDetailPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { NewsArticlePage } from "./pages/NewsArticlePage";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/community/post/:postId" element={<PostDetailPage />} />
           <Route path="/news" element={<NewsPage />} />
+          <Route path="/news/:articleId" element={<NewsArticlePage />} />
           <Route path="/staff" element={<StaffPage />} />
           <Route path="/store" element={<StorePage />} />
           <Route path="/photos" element={<PhotosPage />} />

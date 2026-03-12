@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { apiGet } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 import { Clock, Shield, Users } from "lucide-react";
 
@@ -12,7 +13,25 @@ interface OldStaffMember {
 }
 
 export function OldStaffPage() {
-  const [members] = useState<OldStaffMember[]>([]);
+  const [members, setMembers] = useState<OldStaffMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiGet("/api/staff/history")
+      .then((data) => {
+        setMembers(data.members || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
