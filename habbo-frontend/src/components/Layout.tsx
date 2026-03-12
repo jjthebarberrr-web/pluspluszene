@@ -154,6 +154,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           alt="HabPlus Banner"
           className="absolute inset-0 w-full h-full object-cover"
           style={{imageRendering: 'pixelated'}}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
         {/* Dark overlay for readability */}
         <div className="absolute inset-0" style={{background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)'}} />
@@ -253,7 +254,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 onMouseEnter={() => setCommunityOpen(true)}
                 onMouseLeave={() => setCommunityOpen(false)}
               >
-                <button
+                <Link
+                  to="/community"
                   className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
                     isAnyCommunityActive()
                       ? "bg-black/40 text-white border-white/30"
@@ -261,7 +263,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   Community<img src="https://fresh-hotel.org/image/nav/icon_203.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
-                </button>
+                </Link>
                 {communityOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-52 z-50">
                     <li>
@@ -362,7 +364,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Store 🛍️
+                  Store <img src="https://images.habbo.com/c_images/catalogue/icon_68.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                 </Link>
               </li>
 
@@ -540,16 +542,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-900 bg-black mt-12">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Gamepad2 className="w-5 h-5 text-purple-500" />
-              <span className="font-bold text-zinc-500">HabPlus</span>
+      <footer className="border-t border-zinc-800 bg-zinc-950 mt-12">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Brand */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Gamepad2 className="w-5 h-5 text-purple-500" />
+                <span className="font-bold text-zinc-300">HabPlus</span>
+              </div>
+              <p className="text-xs text-zinc-600 leading-relaxed">Your retro hotel experience. Build rooms, make friends, and explore the community.</p>
             </div>
-            <p className="text-xs text-zinc-600">
-              Powered by Nitro HTML5 &amp; Arcturus Morningstar | Not affiliated with Sulake
-            </p>
+            {/* Quick Links */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Quick Links</span>
+              <Link to="/news" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">News</Link>
+              <Link to="/community" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Community</Link>
+              <Link to="/leaderboards" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Leaderboards</Link>
+              <Link to="/store" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Store</Link>
+            </div>
+            {/* Info */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Information</span>
+              <Link to="/help" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Help & FAQ</Link>
+              <Link to="/staff" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Staff Team</Link>
+              <Link to="/economy" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Economy Guide</Link>
+            </div>
+          </div>
+          <div className="border-t border-zinc-800 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-xs text-zinc-600">&copy; {new Date().getFullYear()} HabPlus. All rights reserved.</p>
+            <p className="text-xs text-zinc-700">Powered by Nitro HTML5 &amp; Arcturus Morningstar | Not affiliated with Sulake</p>
           </div>
         </div>
       </footer>
