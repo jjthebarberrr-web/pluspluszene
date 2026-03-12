@@ -21,10 +21,67 @@
     <link rel="modulepreload" crossorigin href="/nitro/assets/vendor-48792d42.js">
     <link rel="modulepreload" crossorigin href="/nitro/assets/nitro-renderer-493a6bde.js">
     <link rel="stylesheet" href="/nitro/src/assets/index.css">
+      <link rel="stylesheet" href="/nitro/nitro-custom.css">
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root" class="w-100 h-100"></div>
+    <script>
+      // Global error catcher - shows ALL errors in console
+      window.addEventListener('error', function(e) {
+        console.error('[NITRO ERROR]', e.message, 'at', e.filename + ':' + e.lineno);
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('[NITRO PROMISE ERROR]', e.reason);
+      });
+      // Override fetch to force correct Content-Type for .nitro files
+      // The Nitro client's asset manager uses a switch on Content-Type
+      // and only processes 'application/octet-stream' - any other type gets silently skipped
+      const _origFetch = window.fetch;
+      window.fetch = async function(...args) {
+        const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+        try {
+          const resp = await _origFetch.apply(this, args);
+          if (!resp.ok && (url.includes('.nitro') || url.includes('.json') || url.includes('gamedata'))) {
+            console.error('[NITRO FETCH FAIL]', resp.status, url);
+          }
+          // CRITICAL FIX: Force correct Content-Type for .nitro files
+          // The server may return wrong Content-Type, but the Nitro client
+          // REQUIRES 'application/octet-stream' to process .nitro bundles
+          if (url.endsWith('.nitro') && resp.ok) {
+            const ct = resp.headers.get('content-type') || '';
+            if (ct !== 'application/octet-stream') {
+              console.warn('[NITRO FIX] Overriding Content-Type for', url, 'from', ct, 'to application/octet-stream');
+              // Create a new Response with forced Content-Type
+              const body = await resp.arrayBuffer();
+              const newHeaders = new Headers(resp.headers);
+              newHeaders.set('Content-Type', 'application/octet-stream');
+              return new Response(body, {
+                status: resp.status,
+                statusText: resp.statusText,
+                headers: newHeaders
+              });
+            }
+          }
+          return resp;
+        } catch(err) {
+          console.error('[NITRO FETCH ERROR]', url, err.message);
+          throw err;
+        }
+      };
+      // Log loading progress changes
+      let _lastPercent = '';
+      setInterval(function() {
+        const el = document.querySelector('.nitro-loading-percentage, [class*=loading] [class*=percent], .progress-bar');
+        if (!el) return;
+        const text = el.textContent || el.innerText;
+        if (text && text !== _lastPercent) {
+          _lastPercent = text;
+          console.log('[NITRO LOADING]', text);
+        }
+      }, 500);
+      console.log('[NITRO DEBUG] Error catching, fetch logging, and .nitro Content-Type fix enabled');
+    </script>
     <script>
       // Dynamically build WebSocket URL based on current page host
       const wsProtocol = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
