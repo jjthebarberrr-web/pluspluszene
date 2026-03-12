@@ -340,19 +340,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
 
-              {/* Battle Pass */}
-              <li>
-                <Link
-                  to="/battlepass"
-                  className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
-                    isActive("/battlepass")
-                      ? "bg-black/40 text-white border-white/30"
-                      : "text-red-100 hover:bg-black/20 hover:text-white"
-                  }`}
-                >
-                  Battle Pass <img src="https://images.habbo.com/c_images/catalogue/icon_213.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
-                </Link>
-              </li>
 
               {/* Economy Guide */}
               <li>
@@ -534,7 +521,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   )}
                 </div>
                 <Link to="/leaderboards" className={`block px-4 py-2.5 rounded ${isActive("/leaderboards") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Leaderboards</Link>
-                <Link to="/battlepass" className={`block px-4 py-2.5 rounded ${isActive("/battlepass") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Battle Pass</Link>
                 <Link to="/economy" className={`block px-4 py-2.5 rounded ${isActive("/economy") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Economy</Link>
                 <Link to="/store" className={`block px-4 py-2.5 rounded ${isActive("/store") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Store</Link>
                 {userRank >= 6 && <Link to="/housekeeping" className={`block px-4 py-2.5 rounded ${isActive("/housekeeping") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Housekeeping</Link>}
