@@ -36,9 +36,9 @@ const boardConfig: { key: keyof AllBoards; label: string; emoji: string; twGradi
 ];
 
 function MedalBadge({ index }: { index: number }) {
-  if (index === 0) return <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-700 border border-yellow-500 shadow-[0_0_6px_rgba(255,215,0,0.4)] flex items-center justify-center text-[11px] font-bold text-white shrink-0">1</div>;
-  if (index === 1) return <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 border border-gray-400 flex items-center justify-center text-[11px] font-bold text-white shrink-0">2</div>;
-  if (index === 2) return <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 border border-amber-700 flex items-center justify-center text-[11px] font-bold text-white shrink-0">3</div>;
+  if (index === 0) return <img src="/images/leaderboards/gold.png" alt="1st" className="w-7 h-7 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  if (index === 1) return <img src="/images/leaderboards/silver.png" alt="2nd" className="w-7 h-7 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  if (index === 2) return <img src="/images/leaderboards/bronze.png" alt="3rd" className="w-7 h-7 shrink-0" style={{ imageRendering: "pixelated" }} />;
   return <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[11px] font-bold text-zinc-500 shrink-0">{index + 1}</div>;
 }
 
