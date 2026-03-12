@@ -24,6 +24,7 @@ interface NewsItem {
   title: string;
   category: string;
   created_at: number;
+  image_url?: string;
 }
 
 interface UserOfWeek {
@@ -227,9 +228,15 @@ export function HomePage() {
               {homeData?.latest_news && homeData.latest_news.length > 0 ? (
                 homeData.latest_news.map((article) => (
                   <Link key={article.id} to="/news" className="flex items-start gap-3 px-3 py-2.5 hover:bg-zinc-800/50 transition-all group">
-                    <div className={`w-8 h-8 rounded flex-shrink-0 flex items-center justify-center ${getCategoryColor(article.category)}`}>
-                      <span className="text-white text-xs font-bold">{article.category.charAt(0).toUpperCase()}</span>
-                    </div>
+                    {article.image_url ? (
+                      <div className="w-10 h-10 rounded flex-shrink-0 overflow-hidden bg-zinc-800 border border-zinc-700">
+                        <img src={article.image_url} alt="" className="w-full h-full object-cover" style={{imageRendering: 'pixelated'}} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center ' + getCategoryColor(article.category) + '"><span class="text-white text-xs font-bold">' + article.category.charAt(0).toUpperCase() + '</span></div>'; }} />
+                      </div>
+                    ) : (
+                      <div className={`w-10 h-10 rounded flex-shrink-0 flex items-center justify-center ${getCategoryColor(article.category)}`}>
+                        <span className="text-white text-xs font-bold">{article.category.charAt(0).toUpperCase()}</span>
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-zinc-300 group-hover:text-white transition-all font-medium truncate">{article.title}</p>
                       <p className="text-xs text-zinc-600 mt-0.5">{formatDate(article.created_at)}</p>

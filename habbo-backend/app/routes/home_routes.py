@@ -60,16 +60,20 @@ async def get_home_data():
             # Current user's currencies (returned separately via /api/auth/me)
             # Latest news
             await cur.execute(
-                "SELECT id, title, category, created_at FROM news ORDER BY created_at DESC LIMIT 7"
+                "SELECT id, title, category, created_at, image_url FROM news ORDER BY created_at DESC LIMIT 7"
             )
             news_rows = await cur.fetchall()
             news = []
             for n in news_rows:
+                img = n[4] or ''
+                if img and not img.startswith('http'):
+                    img = 'https://images.habbo.com' + img
                 news.append({
                     "id": n[0],
                     "title": n[1],
                     "category": n[2],
                     "created_at": n[3],
+                    "image_url": img,
                 })
 
             # Newest registered user
