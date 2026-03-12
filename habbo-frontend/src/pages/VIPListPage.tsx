@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
-import { Crown, Gem, Star, Diamond, Users } from "lucide-react";
+import { Crown, Users } from "lucide-react";
 
 interface VIPMember {
   id: number;
@@ -23,11 +23,11 @@ interface VIPGroup {
   members: VIPMember[];
 }
 
-const rankIcons: Record<string, React.ReactNode> = {
-  diamond: <Diamond className="w-5 h-5" />,
-  crown: <Crown className="w-5 h-5" />,
-  gem: <Gem className="w-5 h-5" />,
-  star: <Star className="w-5 h-5" />,
+const rankBadgeImages: Record<number, string> = {
+  5: "/badges/vip_diamond.png",
+  4: "/badges/vip_gold.png",
+  3: "/badges/vip_silver.png",
+  2: "/badges/vip_bronze.png",
 };
 
 const rankBadgeColors: Record<number, string> = {
@@ -88,14 +88,18 @@ export function VIPListPage() {
       {/* VIP Rank Cards */}
       <div className="space-y-4">
         {vipGroups.map((group) => {
-          const Icon = rankIcons[group.icon] || rankIcons.star;
+          const badgeImg = rankBadgeImages[group.rank];
           return (
             <div key={group.rank} className="rounded-lg overflow-hidden border border-zinc-800">
               {/* Rank Header */}
               <div className={`bg-gradient-to-r ${group.color} px-5 py-3 flex items-center justify-between`}>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-black/20 rounded-lg flex items-center justify-center border border-white/10">
-                    {Icon}
+                  <div className="w-10 h-10 bg-black/20 rounded-lg flex items-center justify-center border border-white/10 p-1">
+                    {badgeImg ? (
+                      <img src={badgeImg} alt={group.rank_name} className="w-8 h-8 object-contain drop-shadow-lg" />
+                    ) : (
+                      <Crown className="w-5 h-5 text-white" />
+                    )}
                   </div>
                   <div>
                     <div className="font-bold text-white text-sm tracking-wide">{group.rank_name}</div>
@@ -133,10 +137,13 @@ export function VIPListPage() {
                               &quot;{member.motto || "No motto"}&quot;
                             </div>
                             <span
-                              className={`inline-flex items-center gap-1 mt-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${
+                              className={`inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${
                                 rankBadgeColors[member.rank] || "bg-zinc-800 text-zinc-400 border-zinc-700"
                               }`}
                             >
+                              {rankBadgeImages[member.rank] && (
+                                <img src={rankBadgeImages[member.rank]} alt="" className="w-4 h-4 object-contain" />
+                              )}
                               {member.rank_name}
                             </span>
                           </div>
