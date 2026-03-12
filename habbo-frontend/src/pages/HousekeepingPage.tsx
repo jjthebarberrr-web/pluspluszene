@@ -604,6 +604,119 @@ function BansTab({ userRank: _userRank }: { userRank: number }) {
 }
 
 // ==================== NEWS MANAGEMENT ====================
+function CImagePicker({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const [images, setImages] = useState<string[]>([]);
+  const [filenames, setFilenames] = useState<string[]>([]);
+  const [folders, setFolders] = useState<string[]>([]);
+  const [folder, setFolder] = useState("catalogue");
+  const [search, setSearch] = useState("");
+  const [imgPage, setImgPage] = useState(1);
+  const [imgPages, setImgPages] = useState(1);
+  const [imgTotal, setImgTotal] = useState(0);
+  const [imgLoading, setImgLoading] = useState(false);
+
+  const loadImages = useCallback(async (f = folder, q = search, p = 1) => {
+    setImgLoading(true);
+    try {
+      const data = await apiGet(`/api/housekeeping/c-images?folder=${encodeURIComponent(f)}&q=${encodeURIComponent(q)}&page=${p}&per_page=60`);
+      setImages(data.images);
+      setFilenames(data.filenames);
+      setFolders(data.folders);
+      setImgPage(data.page);
+      setImgPages(data.pages);
+      setImgTotal(data.total);
+    } catch { setImages([]); }
+    setImgLoading(false);
+  }, [folder, search]);
+
+  useEffect(() => { loadImages(); }, []);
+
+  const handleSearch = () => { loadImages(folder, search, 1); };
+  const handleFolderChange = (f: string) => { setFolder(f); setSearch(""); loadImages(f, "", 1); };
+  const handlePageChange = (p: number) => { loadImages(folder, search, p); };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm text-zinc-400 block">Article Image</label>
+      {/* Folder tabs + search */}
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          value={folder}
+          onChange={(e) => handleFolderChange(e.target.value)}
+          className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
+        >
+          {folders.map((f) => (
+            <option key={f} value={f}>{f}</option>
+          ))}
+        </select>
+        <div className="flex-1 flex gap-1">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            placeholder="Search images..."
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white min-w-0"
+          />
+          <button onClick={handleSearch} className="px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs text-white flex items-center gap-1">
+            <Search className="w-3 h-3" /> Search
+          </button>
+        </div>
+        <span className="text-[10px] text-zinc-500">{imgTotal} images</span>
+      </div>
+      {/* Image grid */}
+      <div className="bg-zinc-800 border border-zinc-700 rounded p-2 max-h-64 overflow-y-auto">
+        {/* No image option */}
+        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className={`flex items-center justify-center h-14 rounded border-2 transition-all text-[9px] text-zinc-500 ${
+              !value ? "border-purple-500 bg-purple-900/30" : "border-zinc-700 hover:border-zinc-500"
+            }`}
+          >
+            None
+          </button>
+          {imgLoading ? (
+            <div className="col-span-9 flex items-center justify-center py-6 text-zinc-500 text-xs">Loading images...</div>
+          ) : images.map((url, i) => (
+            <button
+              key={url}
+              type="button"
+              onClick={() => onChange(url)}
+              title={filenames[i]}
+              className={`flex flex-col items-center justify-center h-14 rounded border-2 transition-all overflow-hidden ${
+                value === url ? "border-purple-500 bg-purple-900/30" : "border-zinc-700 hover:border-zinc-500"
+              }`}
+            >
+              <img src={url} alt={filenames[i]} className="w-full h-9 object-contain" style={{ imageRendering: "pixelated" }} loading="lazy" />
+              <span className="text-[7px] text-zinc-500 mt-0.5 truncate w-full text-center px-0.5 leading-tight">{filenames[i]?.replace(/\.(png|gif|jpg)$/i, "").slice(0, 12)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Pagination */}
+      {imgPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button onClick={() => handlePageChange(imgPage - 1)} disabled={imgPage <= 1} className="p-1 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 rounded text-xs">
+            <ChevronLeft className="w-3 h-3" />
+          </button>
+          <span className="text-[10px] text-zinc-400">Page {imgPage}/{imgPages}</span>
+          <button onClick={() => handlePageChange(imgPage + 1)} disabled={imgPage >= imgPages} className="p-1 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 rounded text-xs">
+            <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+      {/* Selected image preview */}
+      {value && (
+        <div className="flex items-center gap-2">
+          <img src={value} alt="Selected" className="h-8 rounded" style={{ imageRendering: "pixelated" }} />
+          <span className="text-xs text-zinc-500 truncate">{value.split("/").pop()}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NewsTab() {
   const [articles, setArticles] = useState<any[]>([]);
   const [page, setPage] = useState(1);
@@ -687,56 +800,7 @@ function NewsTab() {
               <option value="promotion">Promotion</option>
             </select>
           </div>
-          <div>
-            <label className="text-sm text-zinc-400 block mb-1">Article Image</label>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 bg-zinc-800 border border-zinc-700 rounded p-3 max-h-48 overflow-y-auto">
-              {/* No image option */}
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, image_url: "" })}
-                className={`flex items-center justify-center h-16 rounded border-2 transition-all text-xs text-zinc-500 ${
-                  !form.image_url ? "border-purple-500 bg-purple-900/30" : "border-zinc-700 hover:border-zinc-500"
-                }`}
-              >
-                None
-              </button>
-              {[
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_habboween12.png", label: "Halloween" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_xmas11.png", label: "Christmas" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_val12.png", label: "Valentine" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_credits.png", label: "Credits" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_habbowood.png", label: "Habbowood" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_beach.png", label: "Beach" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_bling.png", label: "Bling" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_gamecentre.png", label: "Games" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_newyear.png", label: "New Year" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_easter10.png", label: "Easter" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_campaign1.png", label: "Campaign" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_party.png", label: "Party" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_rare.png", label: "Rares" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_medieval.png", label: "Medieval" },
-                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_space.png", label: "Space" },
-              ].map((img) => (
-                <button
-                  key={img.url}
-                  type="button"
-                  onClick={() => setForm({ ...form, image_url: img.url })}
-                  className={`flex flex-col items-center justify-center h-16 rounded border-2 transition-all overflow-hidden ${
-                    form.image_url === img.url ? "border-purple-500 bg-purple-900/30" : "border-zinc-700 hover:border-zinc-500"
-                  }`}
-                >
-                  <img src={img.url} alt={img.label} className="w-full h-10 object-cover" style={{imageRendering: "pixelated"}} />
-                  <span className="text-[9px] text-zinc-400 mt-0.5 truncate w-full text-center px-0.5">{img.label}</span>
-                </button>
-              ))}
-            </div>
-            {form.image_url && (
-              <div className="mt-2 flex items-center gap-2">
-                <img src={form.image_url} alt="Selected" className="h-8 rounded" style={{imageRendering: "pixelated"}} />
-                <span className="text-xs text-zinc-500 truncate">{form.image_url.split("/").pop()}</span>
-              </div>
-            )}
-          </div>
+          <CImagePicker value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} />
           <div>
             <label className="text-sm text-zinc-400 block mb-1">Content</label>
             <textarea
