@@ -67,11 +67,16 @@ export function LoginPage() {
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
-          <div className="mt-4 text-center">
+          <div className="mt-4 text-center space-y-2">
             <p className="text-sm text-zinc-500">
               Don't have an account?{" "}
               <Link to="/register" className="text-teal-400 hover:text-teal-300 font-medium">
                 Register for free
+              </Link>
+            </p>
+            <p className="text-sm">
+              <Link to="/forgot-password" className="text-zinc-500 hover:text-amber-400 transition-colors">
+                Forgot your password?
               </Link>
             </p>
           </div>

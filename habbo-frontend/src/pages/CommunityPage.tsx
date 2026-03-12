@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { apiGet, apiPost, isLoggedIn } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 import { Users, MessageSquare, Heart, PlusCircle, Send, Trophy, TrendingUp, AlertCircle } from "lucide-react";
@@ -152,10 +153,10 @@ export function CommunityPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-semibold text-zinc-100">{post.title}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-sky-400 font-medium">{post.username}</span>
+                          <div>
+                            <Link to={`/community/post/${post.id}`} className="font-semibold text-zinc-100 hover:text-sky-400 transition-colors"><h3 className="inline">{post.title}</h3></Link>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Link to={`/user/${post.username}`} className="text-xs text-sky-400 font-medium hover:text-sky-300">{post.username}</Link>
                             <span className="text-xs text-zinc-600">&bull;</span>
                             <span className="text-xs text-zinc-500">{formatTime(post.created_at)}</span>
                           </div>

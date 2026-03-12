@@ -168,6 +168,91 @@ async def update_motto(request: Request, db=Depends(get_db)):
     return {"message": "Motto updated", "motto": motto}
 
 
+@router.put("/me/password")
+async def change_password(request: Request, db=Depends(get_db)):
+    conn, cur = db
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(401, "Not authenticated")
+
+    token = auth_header.split(" ")[1]
+    payload = decode_token(token)
+    if not payload:
+        raise HTTPException(401, "Invalid or expired token")
+
+    body = await request.json()
+    current_password = body.get("current_password", "")
+    new_password = body.get("new_password", "")
+
+    if len(new_password) < 6:
+        raise HTTPException(400, "New password must be at least 6 characters")
+
+    await cur.execute("SELECT password FROM users WHERE id = %s", (payload["user_id"],))
+    row = await cur.fetchone()
+    if not row:
+        raise HTTPException(404, "User not found")
+
+    if not verify_password(current_password, row["password"]):
+        raise HTTPException(400, "Current password is incorrect")
+
+    hashed = hash_password(new_password)
+    await cur.execute("UPDATE users SET password = %s WHERE id = %s", (hashed, payload["user_id"]))
+    return {"message": "Password changed successfully"}
+
+
+@router.put("/me/email")
+async def change_email(request: Request, db=Depends(get_db)):
+    conn, cur = db
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(401, "Not authenticated")
+
+    token = auth_header.split(" ")[1]
+    payload = decode_token(token)
+    if not payload:
+        raise HTTPException(401, "Invalid or expired token")
+
+    body = await request.json()
+    new_email = body.get("email", "")
+
+    if not new_email or "@" not in new_email:
+        raise HTTPException(400, "Invalid email address")
+
+    # Check if email already taken
+    await cur.execute("SELECT id FROM users WHERE mail = %s AND id != %s", (new_email, payload["user_id"]))
+    if await cur.fetchone():
+        raise HTTPException(400, "Email already in use by another account")
+
+    await cur.execute("UPDATE users SET mail = %s WHERE id = %s", (new_email, payload["user_id"]))
+    return {"message": "Email updated successfully", "email": new_email}
+
+
+@router.post("/forgot-password")
+async def forgot_password(request: Request, db=Depends(get_db)):
+    conn, cur = db
+    body = await request.json()
+    username = body.get("username", "")
+    email = body.get("email", "")
+    new_password = body.get("new_password", "")
+
+    if not username or not email:
+        raise HTTPException(400, "Username and email are required")
+    if len(new_password) < 6:
+        raise HTTPException(400, "New password must be at least 6 characters")
+
+    await cur.execute(
+        "SELECT id FROM users WHERE username = %s AND mail = %s",
+        (username, email)
+    )
+    row = await cur.fetchone()
+    if not row:
+        raise HTTPException(400, "No account found with that username and email combination")
+
+    hashed = hash_password(new_password)
+    await cur.execute("UPDATE users SET password = %s WHERE id = %s", (hashed, row["id"]))
+    return {"message": "Password has been reset successfully. You can now log in with your new password."}
+
+
 @router.get("/sso")
 async def get_sso_ticket(request: Request, db=Depends(get_db)):
     conn, cur = db

@@ -23,6 +23,7 @@ from app.routes.photos_routes import router as photos_router
 from app.routes.vip_routes import router as vip_router
 from app.routes.housekeeping_routes import router as housekeeping_router
 from app.routes.radio_routes import router as radio_router
+from app.routes.room_routes import router as room_router
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
@@ -54,6 +55,7 @@ app.include_router(photos_router)
 app.include_router(vip_router)
 app.include_router(housekeeping_router)
 app.include_router(radio_router)
+app.include_router(room_router)
 
 
 @app.get("/healthz")

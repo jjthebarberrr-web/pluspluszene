@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { isLoggedIn, getUsername, clearAuth, apiGet } from "../api";
 import { useState, useEffect, useCallback } from "react";
-import { LogOut, ChevronDown, Gamepad2 } from "lucide-react";
+import { LogOut, ChevronDown, Gamepad2, Settings, HelpCircle, User } from "lucide-react";
 import { HabboAvatar } from "./HabboAvatar";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -358,6 +358,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {meOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-48 z-50">
                     <li>
+                      <Link to={`/user/${username}`} onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        <span className="flex items-center gap-2"><User className="w-3.5 h-3.5" /> My Profile</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/settings" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        <span className="flex items-center gap-2"><Settings className="w-3.5 h-3.5" /> Settings</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/help" onClick={() => setMeOpen(false)} className="block px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all">
+                        <span className="flex items-center gap-2"><HelpCircle className="w-3.5 h-3.5" /> Help & FAQ</span>
+                      </Link>
+                    </li>
+                    <li className="border-t border-zinc-800">
                       <button onClick={() => { setMeOpen(false); handleLogout(); }} className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-all">
                         <span className="flex items-center gap-2"><LogOut className="w-3.5 h-3.5" /> Logout</span>
                       </button>
