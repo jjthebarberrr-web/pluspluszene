@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiGet } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
-import { Trophy } from "lucide-react";
 
 interface LeaderboardUser {
   id: number;
@@ -13,38 +13,103 @@ interface LeaderboardUser {
   diamonds: number;
   online: number;
   account_created: number;
-  events_won?: number;
-  last_online?: number;
+  extra_value?: number;
 }
 
 interface AllBoards {
   richest: LeaderboardUser[];
   most_pixels: LeaderboardUser[];
   most_diamonds: LeaderboardUser[];
-  oldest: LeaderboardUser[];
-  longest_playing: LeaderboardUser[];
-  most_events_won: LeaderboardUser[];
+  most_ltd: LeaderboardUser[];
+  most_logins: LeaderboardUser[];
+  most_achievement: LeaderboardUser[];
+  most_respects: LeaderboardUser[];
+  online_time: LeaderboardUser[];
 }
 
-const boardConfig: { key: keyof AllBoards; label: string; emoji: string; twGradient: string; twText: string; getValue: (u: LeaderboardUser) => string }[] = [
-  { key: "richest", label: "Richest", emoji: "\u{1F4B0}", twGradient: "from-amber-600 to-zinc-900", twText: "text-amber-400", getValue: (u) => `${u.credits.toLocaleString()} credits` },
-  { key: "most_pixels", label: "Most Duckets", emoji: "\u{2B50}", twGradient: "from-green-600 to-zinc-900", twText: "text-green-400", getValue: (u) => `${u.pixels.toLocaleString()} duckets` },
-  { key: "most_diamonds", label: "Most Diamonds", emoji: "\u{1F48E}", twGradient: "from-teal-600 to-zinc-900", twText: "text-teal-400", getValue: (u) => `${(u.diamonds || 0).toLocaleString()} diamonds` },
-  { key: "oldest", label: "Oldest Accounts", emoji: "\u{23F3}", twGradient: "from-purple-700 to-zinc-900", twText: "text-purple-400", getValue: (u) => { const d = new Date(u.account_created * 1000); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } },
-  { key: "longest_playing", label: "Longest Playing", emoji: "\u{1F525}", twGradient: "from-orange-600 to-zinc-900", twText: "text-orange-400", getValue: (u) => { const secs = u.last_online ? (u.last_online - u.account_created) : 0; const days = Math.floor(secs / 86400); return days > 0 ? `${days.toLocaleString()} days` : "Active"; } },
-  { key: "most_events_won", label: "Most Events Won", emoji: "\u{1F3C6}", twGradient: "from-yellow-700 to-zinc-900", twText: "text-yellow-400", getValue: (u) => `${(u.events_won || 0)} events won` },
+const boardConfig: {
+  key: keyof AllBoards;
+  label: string;
+  icon: string;
+  headerBg: string;
+  headerText: string;
+  valueIcon: string;
+  getValue: (u: LeaderboardUser) => string;
+  valueSuffix: string;
+}[] = [
+  {
+    key: "richest", label: "Credits", icon: "/images/leaderboards/credits.png",
+    headerBg: "bg-yellow-400", headerText: "text-yellow-900",
+    valueIcon: "/images/leaderboards/credits.png",
+    getValue: (u) => u.credits.toLocaleString(), valueSuffix: "Credits",
+  },
+  {
+    key: "most_pixels", label: "Duckets", icon: "/images/leaderboards/duckets.png",
+    headerBg: "bg-orange-400", headerText: "text-orange-900",
+    valueIcon: "/images/leaderboards/duckets.png",
+    getValue: (u) => u.pixels.toLocaleString(), valueSuffix: "Duckets",
+  },
+  {
+    key: "most_diamonds", label: "Diamonds", icon: "/images/leaderboards/diamonds.png",
+    headerBg: "bg-cyan-400", headerText: "text-cyan-900",
+    valueIcon: "/images/leaderboards/diamonds.png",
+    getValue: (u) => (u.diamonds || 0).toLocaleString(), valueSuffix: "Diamonds",
+  },
+  {
+    key: "most_ltd", label: "LTD", icon: "/images/leaderboards/jewels.png",
+    headerBg: "bg-purple-400", headerText: "text-purple-900",
+    valueIcon: "/images/leaderboards/jewels.png",
+    getValue: (u) => (u.extra_value || 0).toLocaleString(), valueSuffix: "LTDs",
+  },
+  {
+    key: "most_logins", label: "Logins", icon: "/images/leaderboards/logins.png",
+    headerBg: "bg-green-400", headerText: "text-green-900",
+    valueIcon: "/images/leaderboards/logins.png",
+    getValue: (u) => {
+      const d = new Date(u.account_created * 1000);
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    },
+    valueSuffix: "",
+  },
+  {
+    key: "most_achievement", label: "Achievement Score", icon: "/images/leaderboards/achievement.png",
+    headerBg: "bg-blue-400", headerText: "text-blue-900",
+    valueIcon: "/images/leaderboards/achievement.png",
+    getValue: (u) => (u.extra_value || 0).toLocaleString(), valueSuffix: "Score",
+  },
+  {
+    key: "most_respects", label: "Respects", icon: "/images/leaderboards/respect.gif",
+    headerBg: "bg-rose-400", headerText: "text-rose-900",
+    valueIcon: "/images/leaderboards/respect.gif",
+    getValue: (u) => (u.extra_value || 0).toLocaleString(), valueSuffix: "Respects",
+  },
+  {
+    key: "online_time", label: "Online Time", icon: "/images/leaderboards/time.png",
+    headerBg: "bg-indigo-400", headerText: "text-indigo-900",
+    valueIcon: "/images/leaderboards/time.png",
+    getValue: (u) => {
+      const secs = u.extra_value || 0;
+      const days = Math.floor(secs / 86400);
+      const hours = Math.floor((secs % 86400) / 3600);
+      if (days > 0) return `${days}d ${hours}h`;
+      if (hours > 0) return `${hours}h`;
+      return "Active";
+    },
+    valueSuffix: "",
+  },
 ];
 
 function MedalBadge({ index }: { index: number }) {
-  if (index === 0) return <img src="/images/leaderboards/gold.png" alt="1st" className="w-7 h-7 shrink-0" style={{ imageRendering: "pixelated" }} />;
-  if (index === 1) return <img src="/images/leaderboards/silver.png" alt="2nd" className="w-7 h-7 shrink-0" style={{ imageRendering: "pixelated" }} />;
-  if (index === 2) return <img src="/images/leaderboards/bronze.png" alt="3rd" className="w-7 h-7 shrink-0" style={{ imageRendering: "pixelated" }} />;
-  return <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[11px] font-bold text-zinc-500 shrink-0">{index + 1}</div>;
+  if (index === 0) return <img src="/images/leaderboards/gold.png" alt="1st" className="w-6 h-6 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  if (index === 1) return <img src="/images/leaderboards/silver.png" alt="2nd" className="w-6 h-6 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  if (index === 2) return <img src="/images/leaderboards/bronze.png" alt="3rd" className="w-6 h-6 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  return null;
 }
 
 export function LeaderboardsPage() {
   const [boards, setBoards] = useState<AllBoards | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     apiGet("/api/leaderboards/all")
@@ -62,51 +127,47 @@ export function LeaderboardsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-4">
-      {/* Header */}
-      <div className="rounded-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-purple-700 via-purple-600 to-purple-700 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-black/20 rounded-xl flex items-center justify-center border border-white/10">
-              <Trophy className="w-7 h-7 text-purple-200" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Leaderboards</h1>
-              <p className="text-purple-200/60 text-sm">See who's on top of the hotel</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3x2 Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div className="max-w-7xl mx-auto px-2">
+      {/* Grid of leaderboard cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {boardConfig.map((cfg) => {
           const users = boards ? (boards[cfg.key] || []) : [];
           return (
-            <div key={cfg.key} className="bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800">
-              <div className={`bg-gradient-to-r ${cfg.twGradient} px-3 py-2.5 flex items-center gap-2 border-b border-zinc-700/50`}>
-                <span className="text-base">{cfg.emoji}</span>
-                <span className="font-bold text-white text-sm">{cfg.label}</span>
+            <div key={cfg.key} className="bg-zinc-900/80 rounded-xl overflow-hidden border border-zinc-800 shadow-lg">
+              {/* Category Header */}
+              <div className={`${cfg.headerBg} px-4 py-2.5 flex items-center gap-2.5 rounded-t-xl`}>
+                <img src={cfg.icon} alt={cfg.label} className="w-5 h-5 shrink-0" style={{ imageRendering: "pixelated" }} />
+                <span className={`font-bold text-sm ${cfg.headerText} tracking-wide`}>{cfg.label}</span>
               </div>
-              <div>
+
+              {/* User List */}
+              <div className="divide-y divide-zinc-800/60">
                 {users.length === 0 ? (
-                  <div className="px-3 py-6 text-center text-zinc-600 text-xs">No users yet</div>
+                  <div className="px-4 py-8 text-center text-zinc-600 text-xs">No users yet</div>
                 ) : (
                   users.map((user, idx) => (
-                    <div
-                      key={user.id}
-                      className={`flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-800/50 transition-all ${
-                        idx < users.length - 1 ? "border-b border-zinc-800/50" : ""
-                      } ${idx === 0 ? "bg-yellow-500/5" : ""}`}
-                    >
-                      <MedalBadge index={idx} />
-                      <div className="w-8 h-8 overflow-hidden rounded bg-zinc-800 border border-zinc-700 shrink-0 flex items-center justify-center">
+                    <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-800/40 transition-colors">
+                      {/* Avatar */}
+                      <div className="w-12 h-14 overflow-hidden shrink-0 flex items-end justify-center">
                         <HabboAvatar look={user.look} size="small" direction={2} />
                       </div>
+
+                      {/* Name + Value */}
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-semibold text-zinc-300 truncate">{user.username}</div>
-                        <div className={`text-[10px] font-medium ${cfg.twText}`}>{cfg.getValue(user)}</div>
+                        <button
+                          onClick={() => navigate(`/user/${user.username}`)}
+                          className="text-sm font-bold text-white hover:text-purple-400 transition-colors truncate block text-left"
+                        >
+                          {user.username}
+                        </button>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <img src={cfg.valueIcon} alt="" className="w-3.5 h-3.5 shrink-0" style={{ imageRendering: "pixelated" }} />
+                          <span className="text-xs text-zinc-400">{cfg.getValue(user)} {cfg.valueSuffix}</span>
+                        </div>
                       </div>
+
+                      {/* Medal for top 3 */}
+                      <MedalBadge index={idx} />
                     </div>
                   ))
                 )}
