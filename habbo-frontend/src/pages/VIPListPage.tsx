@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { apiGet } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 import { Crown, Users } from "lucide-react";
@@ -132,7 +133,7 @@ export function VIPListPage() {
                             ></div>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="font-bold text-white text-sm">{member.username}</div>
+                            <Link to={`/user/${member.username}`} className="font-bold text-white text-sm hover:text-amber-400 transition-colors">{member.username}</Link>
                             <div className="text-xs text-zinc-500 truncate mt-0.5 italic">
                               &quot;{member.motto || "No motto"}&quot;
                             </div>
