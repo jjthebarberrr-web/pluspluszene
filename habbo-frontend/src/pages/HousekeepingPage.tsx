@@ -688,13 +688,54 @@ function NewsTab() {
             </select>
           </div>
           <div>
-            <label className="text-sm text-zinc-400 block mb-1">Image URL (optional)</label>
-            <input
-              value={form.image_url}
-              onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
-              placeholder="https://..."
-            />
+            <label className="text-sm text-zinc-400 block mb-1">Article Image</label>
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 bg-zinc-800 border border-zinc-700 rounded p-3 max-h-48 overflow-y-auto">
+              {/* No image option */}
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, image_url: "" })}
+                className={`flex items-center justify-center h-16 rounded border-2 transition-all text-xs text-zinc-500 ${
+                  !form.image_url ? "border-purple-500 bg-purple-900/30" : "border-zinc-700 hover:border-zinc-500"
+                }`}
+              >
+                None
+              </button>
+              {[
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_habboween12.png", label: "Halloween" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_xmas11.png", label: "Christmas" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_val12.png", label: "Valentine" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_credits.png", label: "Credits" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_habbowood.png", label: "Habbowood" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_beach.png", label: "Beach" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_bling.png", label: "Bling" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_gamecentre.png", label: "Games" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_newyear.png", label: "New Year" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_easter10.png", label: "Easter" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_campaign1.png", label: "Campaign" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_party.png", label: "Party" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_rare.png", label: "Rares" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_medieval.png", label: "Medieval" },
+                { url: "https://images.habbo.com/c_images/catalogue/feature_cata_vert_space.png", label: "Space" },
+              ].map((img) => (
+                <button
+                  key={img.url}
+                  type="button"
+                  onClick={() => setForm({ ...form, image_url: img.url })}
+                  className={`flex flex-col items-center justify-center h-16 rounded border-2 transition-all overflow-hidden ${
+                    form.image_url === img.url ? "border-purple-500 bg-purple-900/30" : "border-zinc-700 hover:border-zinc-500"
+                  }`}
+                >
+                  <img src={img.url} alt={img.label} className="w-full h-10 object-cover" style={{imageRendering: "pixelated"}} />
+                  <span className="text-[9px] text-zinc-400 mt-0.5 truncate w-full text-center px-0.5">{img.label}</span>
+                </button>
+              ))}
+            </div>
+            {form.image_url && (
+              <div className="mt-2 flex items-center gap-2">
+                <img src={form.image_url} alt="Selected" className="h-8 rounded" style={{imageRendering: "pixelated"}} />
+                <span className="text-xs text-zinc-500 truncate">{form.image_url.split("/").pop()}</span>
+              </div>
+            )}
           </div>
           <div>
             <label className="text-sm text-zinc-400 block mb-1">Content</label>
