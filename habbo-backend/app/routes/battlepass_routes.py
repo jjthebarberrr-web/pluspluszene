@@ -525,6 +525,253 @@ async def record_daily_login(request: Request, db=Depends(get_db)):
     }
 
 
+@router.post("/sync")
+async def sync_task_progress(request: Request, db=Depends(get_db)):
+    """Sync ALL task progress by reading actual game data from Arcturus DB tables.
+    This reads room_enter_log, chatlogs_room, room_trade_log, logs_shop_purchases,
+    users_settings (respects), and users (motto/login) to auto-detect real progress.
+    Call this whenever the Battle Pass widget opens or refreshes."""
+    user_id = get_user_id(request)
+    conn, cur = db
+
+    await cur.execute(
+        "SELECT id FROM battle_pass_seasons WHERE is_active = 1 ORDER BY id DESC LIMIT 1"
+    )
+    season = await cur.fetchone()
+    if not season:
+        return {"synced": False, "message": "No active season"}
+
+    season_id = season["id"]
+    today = datetime.date.today()
+    today_str = today.isoformat()
+
+    # Calculate start-of-day and start-of-week timestamps
+    start_of_day = int(datetime.datetime.combine(today, datetime.time.min).timestamp())
+    monday = today - datetime.timedelta(days=today.weekday())
+    start_of_week = int(datetime.datetime.combine(monday, datetime.time.min).timestamp())
+    weekly_reset_date = monday.isoformat()
+
+    # ---- Create/get daily snapshot for respect tracking ----
+    # Arcturus stores cumulative respects_given in users_settings.
+    # We snapshot the value at first sync each day to calculate daily respects.
+    await cur.execute(
+        "SELECT respects_given FROM users_settings WHERE user_id = %s", (user_id,)
+    )
+    settings_row = await cur.fetchone()
+    current_respects_given = settings_row["respects_given"] if settings_row else 0
+
+    await cur.execute(
+        "SELECT * FROM battle_pass_daily_snapshot WHERE user_id = %s AND snapshot_date = %s",
+        (user_id, today_str)
+    )
+    snapshot = await cur.fetchone()
+    if not snapshot:
+        # First sync today — create snapshot with current cumulative values
+        await cur.execute(
+            """INSERT INTO battle_pass_daily_snapshot (user_id, snapshot_date, respects_given_start)
+               VALUES (%s, %s, %s)
+               ON DUPLICATE KEY UPDATE id = id""",
+            (user_id, today_str, current_respects_given)
+        )
+        respects_given_start = current_respects_given
+    else:
+        respects_given_start = snapshot["respects_given_start"]
+
+    # Calculate today's respects given
+    daily_respects = max(0, current_respects_given - respects_given_start)
+
+    # For weekly respects, sum up from all daily snapshots this week
+    await cur.execute(
+        """SELECT COALESCE(SUM(s2.respects_end - s1.respects_given_start), 0) as weekly_total
+           FROM battle_pass_daily_snapshot s1
+           LEFT JOIN (
+               SELECT user_id, snapshot_date,
+                      COALESCE(LEAD(respects_given_start) OVER (PARTITION BY user_id ORDER BY snapshot_date), %s) as respects_end
+               FROM battle_pass_daily_snapshot WHERE user_id = %s AND snapshot_date >= %s
+           ) s2 ON s1.user_id = s2.user_id AND s1.snapshot_date = s2.snapshot_date
+           WHERE s1.user_id = %s AND s1.snapshot_date >= %s""",
+        (current_respects_given, user_id, weekly_reset_date, user_id, weekly_reset_date)
+    )
+    weekly_respect_row = await cur.fetchone()
+    weekly_respects = weekly_respect_row["weekly_total"] if weekly_respect_row else daily_respects
+
+    # Get all active tasks for this season
+    await cur.execute(
+        "SELECT * FROM battle_pass_tasks WHERE season_id = %s AND is_active = 1",
+        (season_id,)
+    )
+    tasks = await cur.fetchall()
+
+    synced_tasks = []
+
+    for task in tasks:
+        task_key = task["task_key"]
+        target = task["target"]
+        reset_date = today_str if task["task_type"] == "daily" else weekly_reset_date
+        since_ts = start_of_day if task["task_type"] == "daily" else start_of_week
+
+        progress = 0
+
+        try:
+            if task_key == "daily_login":
+                # Check if user logged in today (last_login >= start of today)
+                await cur.execute("SELECT last_login FROM users WHERE id = %s", (user_id,))
+                user_row = await cur.fetchone()
+                if user_row and user_row["last_login"] and user_row["last_login"] >= start_of_day:
+                    progress = 1
+
+            elif task_key == "change_motto":
+                # Check if already marked as done today
+                await cur.execute(
+                    "SELECT progress FROM battle_pass_user_tasks WHERE user_id = %s AND task_id = %s AND reset_date = %s",
+                    (user_id, task["id"], reset_date)
+                )
+                existing = await cur.fetchone()
+                if existing and existing["progress"] >= 1:
+                    progress = 1
+                else:
+                    # Detect motto change by comparing to last known motto
+                    await cur.execute("SELECT motto FROM users WHERE id = %s", (user_id,))
+                    user_row = await cur.fetchone()
+                    current_motto = user_row["motto"] if user_row else ""
+
+                    await cur.execute(
+                        "SELECT motto FROM battle_pass_motto_track WHERE user_id = %s ORDER BY id DESC LIMIT 1",
+                        (user_id,)
+                    )
+                    last_motto_row = await cur.fetchone()
+
+                    if last_motto_row is None:
+                        # No history — record current motto as baseline
+                        await cur.execute(
+                            """INSERT INTO battle_pass_motto_track (user_id, motto, tracked_date)
+                               VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE motto = %s""",
+                            (user_id, current_motto, today_str, current_motto)
+                        )
+                        progress = 0  # baseline, no change yet
+                    elif last_motto_row["motto"] != current_motto:
+                        # Motto actually changed! Grant progress
+                        await cur.execute(
+                            """INSERT INTO battle_pass_motto_track (user_id, motto, tracked_date)
+                               VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE motto = %s""",
+                            (user_id, current_motto, today_str, current_motto)
+                        )
+                        progress = 1
+
+            elif task_key == "visit_rooms":
+                # Count distinct rooms visited today from room_enter_log
+                await cur.execute(
+                    "SELECT COUNT(DISTINCT room_id) as cnt FROM room_enter_log WHERE user_id = %s AND timestamp >= %s",
+                    (user_id, since_ts)
+                )
+                row = await cur.fetchone()
+                progress = min(row["cnt"], target) if row else 0
+
+            elif task_key == "send_messages":
+                # Count chat messages sent today from chatlogs_room
+                await cur.execute(
+                    "SELECT COUNT(*) as cnt FROM chatlogs_room WHERE user_from_id = %s AND timestamp >= %s",
+                    (user_id, since_ts)
+                )
+                row = await cur.fetchone()
+                progress = min(row["cnt"], target) if row else 0
+
+            elif task_key == "respect_users":
+                # Daily respects given (from snapshot diff)
+                progress = min(daily_respects, target)
+
+            elif task_key == "login_streak":
+                # Weekly: login streak from battle_pass_user_progress
+                await cur.execute(
+                    "SELECT login_streak FROM battle_pass_user_progress WHERE user_id = %s AND season_id = %s",
+                    (user_id, season_id)
+                )
+                prog = await cur.fetchone()
+                progress = min(prog["login_streak"], target) if prog else 0
+
+            elif task_key == "respect_weekly":
+                # Weekly respects given (sum of daily diffs)
+                progress = min(weekly_respects, target)
+
+            elif task_key == "room_visits_weekly":
+                # Count distinct rooms visited this week
+                await cur.execute(
+                    "SELECT COUNT(DISTINCT room_id) as cnt FROM room_enter_log WHERE user_id = %s AND timestamp >= %s",
+                    (user_id, since_ts)
+                )
+                row = await cur.fetchone()
+                progress = min(row["cnt"], target) if row else 0
+
+            elif task_key == "trade_items":
+                # Count trades this week from room_trade_log
+                await cur.execute(
+                    "SELECT COUNT(*) as cnt FROM room_trade_log WHERE (user_one_id = %s OR user_two_id = %s) AND timestamp >= %s",
+                    (user_id, user_id, since_ts)
+                )
+                row = await cur.fetchone()
+                progress = min(row["cnt"], target) if row else 0
+
+            elif task_key == "spend_credits":
+                # Total credits spent in catalog this week
+                await cur.execute(
+                    "SELECT COALESCE(SUM(cost_credits), 0) as total FROM logs_shop_purchases WHERE user_id = %s AND timestamp >= %s",
+                    (user_id, since_ts)
+                )
+                row = await cur.fetchone()
+                progress = min(int(row["total"]), target) if row else 0
+
+        except Exception:
+            # If any query fails (table doesn't exist etc), keep existing progress
+            try:
+                await cur.execute(
+                    "SELECT progress FROM battle_pass_user_tasks WHERE user_id = %s AND task_id = %s AND reset_date = %s",
+                    (user_id, task["id"], reset_date)
+                )
+                existing = await cur.fetchone()
+                progress = existing["progress"] if existing else 0
+            except Exception:
+                progress = 0
+
+        # Update the task progress (use GREATEST so we never lose progress)
+        completed = 1 if progress >= target else 0
+        await cur.execute(
+            """INSERT INTO battle_pass_user_tasks (user_id, season_id, task_id, progress, completed, claimed, reset_date)
+               VALUES (%s, %s, %s, %s, %s, 0, %s)
+               ON DUPLICATE KEY UPDATE progress = GREATEST(progress, %s), completed = GREATEST(completed, %s)""",
+            (user_id, season_id, task["id"], progress, completed, reset_date, progress, completed)
+        )
+
+        synced_tasks.append({
+            "task_id": task["id"],
+            "task_key": task_key,
+            "progress": progress,
+            "target": target,
+            "completed": bool(completed),
+        })
+
+    # Also auto-complete daily login task and record login
+    try:
+        await cur.execute("SELECT last_login FROM users WHERE id = %s", (user_id,))
+        u = await cur.fetchone()
+        if u and u["last_login"] and u["last_login"] >= start_of_day:
+            await cur.execute(
+                "SELECT id FROM battle_pass_tasks WHERE season_id = %s AND task_key = 'daily_login' AND is_active = 1",
+                (season_id,)
+            )
+            login_task = await cur.fetchone()
+            if login_task:
+                await cur.execute(
+                    """INSERT INTO battle_pass_user_tasks (user_id, season_id, task_id, progress, completed, claimed, reset_date)
+                       VALUES (%s, %s, %s, 1, 1, 0, %s)
+                       ON DUPLICATE KEY UPDATE progress = 1, completed = 1""",
+                    (user_id, season_id, login_task["id"], today_str)
+                )
+    except Exception:
+        pass
+
+    return {"synced": True, "tasks": synced_tasks}
+
+
 async def _recalculate_tier(cur, user_id: int, season_id: int):
     """Recalculate user's current tier based on total XP."""
     await cur.execute(
