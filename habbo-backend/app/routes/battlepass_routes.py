@@ -791,11 +791,10 @@ async def _recalculate_tier(cur, user_id: int, season_id: int):
     )
     tiers = await cur.fetchall()
 
-    cumulative_xp = 0
     new_tier = 0
     for t in tiers:
-        cumulative_xp += t["xp_required"]
-        if total_xp >= cumulative_xp:
+        # xp_required is the TOTAL cumulative XP needed for this tier
+        if total_xp >= t["xp_required"]:
             new_tier = t["tier"]
         else:
             break

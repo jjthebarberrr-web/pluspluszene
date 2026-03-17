@@ -893,7 +893,7 @@
       showToast(msg);
       await loadData();
     } catch(err) {
-      showToast('Failed to claim tier reward');
+      showToast(err.message || 'Failed to claim tier reward');
       console.error('[BP Widget] Claim tier error:', err);
     }
   }
