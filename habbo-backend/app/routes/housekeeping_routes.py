@@ -1,4 +1,6 @@
 import time
+import os
+from pathlib import Path
 from fastapi import APIRouter, Depends, Request, HTTPException
 from pydantic import BaseModel
 from typing import Optional
@@ -891,3 +893,53 @@ async def delete_event(event_id: int, request: Request):
         await conn.commit()
 
     return {"ok": True, "message": "Event deleted"}
+
+
+# ==================== C_IMAGES LISTING (for news image picker) ====================
+
+STATIC_DIR = Path(__file__).parent.parent.parent / "static"
+C_IMAGES_CATALOGUE_DIR = STATIC_DIR / "c_images" / "catalogue"
+
+
+@router.get("/c-images")
+async def list_c_images(request: Request, folder: str = "catalogue", q: str = "", page: int = 1, per_page: int = 80):
+    """List available c_images for the news image picker - rank 6+"""
+    user = await get_staff_user(request)
+
+    base_dir = STATIC_DIR / "c_images"
+    target_dir = base_dir / folder
+
+    if not target_dir.is_dir():
+        return {"images": [], "total": 0, "page": 1, "pages": 1, "folders": []}
+
+    # List subfolders
+    folders = sorted([f.name for f in base_dir.iterdir() if f.is_dir()])
+
+    # List image files
+    all_images = sorted([
+        f.name for f in target_dir.iterdir()
+        if f.is_file() and f.suffix.lower() in (".png", ".gif", ".jpg", ".jpeg")
+    ])
+
+    # Filter by search query
+    if q:
+        q_lower = q.lower()
+        all_images = [img for img in all_images if q_lower in img.lower()]
+
+    total = len(all_images)
+    pages = max(1, (total + per_page - 1) // per_page)
+    page = max(1, min(page, pages))
+    start = (page - 1) * per_page
+    page_images = all_images[start:start + per_page]
+
+    # Return URL paths relative to site root
+    image_urls = [f"/c_images/{folder}/{img}" for img in page_images]
+
+    return {
+        "images": image_urls,
+        "filenames": page_images,
+        "total": total,
+        "page": page,
+        "pages": pages,
+        "folders": folders,
+    }

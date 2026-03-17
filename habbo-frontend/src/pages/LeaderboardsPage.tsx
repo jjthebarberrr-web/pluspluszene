@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiGet } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 
@@ -12,139 +13,161 @@ interface LeaderboardUser {
   diamonds: number;
   online: number;
   account_created: number;
-  events_won?: number;
+  extra_value?: number;
 }
 
 interface AllBoards {
   richest: LeaderboardUser[];
   most_pixels: LeaderboardUser[];
   most_diamonds: LeaderboardUser[];
-  oldest: LeaderboardUser[];
-  longest_playing: LeaderboardUser[];
-  most_events_won: LeaderboardUser[];
+  most_ltd: LeaderboardUser[];
+  most_logins: LeaderboardUser[];
+  most_achievement: LeaderboardUser[];
+  most_respects: LeaderboardUser[];
+  online_time: LeaderboardUser[];
 }
 
-const boardConfig: { key: keyof AllBoards; label: string; emoji: string; color: string; gradient: string; getValue: (u: LeaderboardUser) => string }[] = [
-  { key: "richest", label: "Richest", emoji: "\u{1F4B0}", color: "#E8A820", gradient: "linear-gradient(135deg, #E8A820, #1a1a1a)", getValue: (u) => `${u.credits.toLocaleString()} credits` },
-  { key: "most_pixels", label: "Most Duckets", emoji: "\u{2B50}", color: "#5CB565", gradient: "linear-gradient(135deg, #5CB565, #1a1a1a)", getValue: (u) => `${u.pixels.toLocaleString()} duckets` },
-  { key: "most_diamonds", label: "Most Diamonds", emoji: "\u{1F48E}", color: "#00CFC1", gradient: "linear-gradient(135deg, #00CFC1, #1a1a1a)", getValue: (u) => `${(u.diamonds || 0).toLocaleString()} diamonds` },
-  { key: "oldest", label: "Oldest Accounts", emoji: "\u{23F3}", color: "#5C229E", gradient: "linear-gradient(135deg, #5C229E, #1a1a1a)", getValue: (u) => { const d = new Date(u.account_created * 1000); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } },
-  { key: "longest_playing", label: "Longest Playing", emoji: "\u{1F525}", color: "#E85D04", gradient: "linear-gradient(135deg, #E85D04, #1a1a1a)", getValue: (u) => { const secs = (u as any).last_online ? ((u as any).last_online - u.account_created) : 0; const days = Math.floor(secs / 86400); return days > 0 ? `${days.toLocaleString()} days` : "Active"; } },
-  { key: "most_events_won", label: "Most Events Won", emoji: "\u{1F3C6}", color: "#D4AF37", gradient: "linear-gradient(135deg, #D4AF37, #1a1a1a)", getValue: (u) => `${(u.events_won || 0)} events won` },
+const boardConfig: {
+  key: keyof AllBoards;
+  label: string;
+  icon: string;
+  headerBg: string;
+  headerText: string;
+  valueIcon: string;
+  getValue: (u: LeaderboardUser) => string;
+  valueSuffix: string;
+}[] = [
+  {
+    key: "richest", label: "Credits", icon: "/images/leaderboards/credits.png",
+    headerBg: "bg-yellow-400", headerText: "text-yellow-900",
+    valueIcon: "/images/leaderboards/credits.png",
+    getValue: (u) => u.credits.toLocaleString(), valueSuffix: "Credits",
+  },
+  {
+    key: "most_pixels", label: "Duckets", icon: "/images/leaderboards/duckets.png",
+    headerBg: "bg-orange-400", headerText: "text-orange-900",
+    valueIcon: "/images/leaderboards/duckets.png",
+    getValue: (u) => u.pixels.toLocaleString(), valueSuffix: "Duckets",
+  },
+  {
+    key: "most_diamonds", label: "Diamonds", icon: "/images/leaderboards/diamonds.png",
+    headerBg: "bg-cyan-400", headerText: "text-cyan-900",
+    valueIcon: "/images/leaderboards/diamonds.png",
+    getValue: (u) => (u.diamonds || 0).toLocaleString(), valueSuffix: "Diamonds",
+  },
+  {
+    key: "most_ltd", label: "LTD", icon: "/images/leaderboards/jewels.png",
+    headerBg: "bg-purple-400", headerText: "text-purple-900",
+    valueIcon: "/images/leaderboards/jewels.png",
+    getValue: (u) => (u.extra_value || 0).toLocaleString(), valueSuffix: "LTDs",
+  },
+  {
+    key: "most_logins", label: "Logins", icon: "/images/leaderboards/logins.png",
+    headerBg: "bg-green-400", headerText: "text-green-900",
+    valueIcon: "/images/leaderboards/logins.png",
+    getValue: (u) => {
+      const d = new Date(u.account_created * 1000);
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    },
+    valueSuffix: "",
+  },
+  {
+    key: "most_achievement", label: "Achievement Score", icon: "/images/leaderboards/achievement.png",
+    headerBg: "bg-blue-400", headerText: "text-blue-900",
+    valueIcon: "/images/leaderboards/achievement.png",
+    getValue: (u) => (u.extra_value || 0).toLocaleString(), valueSuffix: "Score",
+  },
+  {
+    key: "most_respects", label: "Respects", icon: "/images/leaderboards/respect.gif",
+    headerBg: "bg-rose-400", headerText: "text-rose-900",
+    valueIcon: "/images/leaderboards/respect.gif",
+    getValue: (u) => (u.extra_value || 0).toLocaleString(), valueSuffix: "Respects",
+  },
+  {
+    key: "online_time", label: "Online Time", icon: "/images/leaderboards/time.png",
+    headerBg: "bg-indigo-400", headerText: "text-indigo-900",
+    valueIcon: "/images/leaderboards/time.png",
+    getValue: (u) => {
+      const secs = u.extra_value || 0;
+      const days = Math.floor(secs / 86400);
+      const hours = Math.floor((secs % 86400) / 3600);
+      if (days > 0) return `${days}d ${hours}h`;
+      if (hours > 0) return `${hours}h`;
+      return "Active";
+    },
+    valueSuffix: "",
+  },
 ];
+
+function MedalBadge({ index }: { index: number }) {
+  if (index === 0) return <img src="/images/leaderboards/gold.png" alt="1st" className="w-6 h-6 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  if (index === 1) return <img src="/images/leaderboards/silver.png" alt="2nd" className="w-6 h-6 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  if (index === 2) return <img src="/images/leaderboards/bronze.png" alt="3rd" className="w-6 h-6 shrink-0" style={{ imageRendering: "pixelated" }} />;
+  return null;
+}
 
 export function LeaderboardsPage() {
   const [boards, setBoards] = useState<AllBoards | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadAll();
+    apiGet("/api/leaderboards/all")
+      .then((data) => setBoards(data))
+      .catch(() => setBoards(null))
+      .finally(() => setLoading(false));
   }, []);
-
-  const loadAll = async () => {
-    setLoading(true);
-    try {
-      const data = await apiGet("/api/leaderboards/all");
-      setBoards(data);
-    } catch {
-      setBoards(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getMedalStyle = (idx: number): React.CSSProperties => {
-    if (idx === 0) return { background: "linear-gradient(135deg, #FFD700, #B8860B)", color: "#fff", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #FFD700", boxShadow: "0 0 6px rgba(255,215,0,0.4)" };
-    if (idx === 1) return { background: "linear-gradient(135deg, #C0C0C0, #808080)", color: "#fff", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #C0C0C0" };
-    if (idx === 2) return { background: "linear-gradient(135deg, #CD7F32, #8B4513)", color: "#fff", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #CD7F32" };
-    return { background: "#222", color: "#666", fontWeight: "bold", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0, border: "1px solid #333" };
-  };
 
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 0" }}>
-        <div style={{ width: "40px", height: "40px", border: "4px solid #5C229E", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: "1100px", margin: "0 auto", fontFamily: "'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-      {/* Header */}
-      <div style={{
-        background: "linear-gradient(135deg, #5C229E, #1a1a1a)",
-        borderRadius: "8px",
-        padding: "16px 20px",
-        marginBottom: "16px",
-        border: "1px solid #2a2a2a",
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-      }}>
-        <span style={{ fontSize: "28px" }}>&#x1F3C6;</span>
-        <div>
-          <h1 style={{ fontSize: "18px", fontWeight: "bold", color: "#fff", margin: 0 }}>Leaderboards</h1>
-          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", margin: 0 }}>See who's on top of the hotel</p>
-        </div>
-      </div>
-
-      {/* 6 Columns - 3x2 grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+    <div className="max-w-7xl mx-auto px-2">
+      {/* Grid of leaderboard cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {boardConfig.map((cfg) => {
           const users = boards ? (boards[cfg.key] || []) : [];
           return (
-            <div key={cfg.key} style={{ background: "#1a1a1a", borderRadius: "8px", overflow: "hidden", border: "1px solid #2a2a2a" }}>
-              {/* Column Header */}
-              <div style={{
-                background: cfg.gradient,
-                padding: "10px 12px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                borderBottom: "1px solid #333",
-              }}>
-                <span style={{ fontSize: "16px" }}>{cfg.emoji}</span>
-                <span style={{ fontWeight: "bold", color: "#fff", fontSize: "13px", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{cfg.label}</span>
+            <div key={cfg.key} className="bg-zinc-900/80 rounded-xl overflow-hidden border border-zinc-800 shadow-lg">
+              {/* Category Header */}
+              <div className={`${cfg.headerBg} px-4 py-2.5 flex items-center gap-2.5 rounded-t-xl`}>
+                <img src={cfg.icon} alt={cfg.label} className="w-5 h-5 shrink-0" style={{ imageRendering: "pixelated" }} />
+                <span className={`font-bold text-sm ${cfg.headerText} tracking-wide`}>{cfg.label}</span>
               </div>
 
               {/* User List */}
-              <div style={{ padding: "0" }}>
+              <div className="divide-y divide-zinc-800/60">
                 {users.length === 0 ? (
-                  <div style={{ padding: "24px 12px", textAlign: "center", color: "#555", fontSize: "12px" }}>
-                    No users yet
-                  </div>
+                  <div className="px-4 py-8 text-center text-zinc-600 text-xs">No users yet</div>
                 ) : (
                   users.map((user, idx) => (
-                    <div
-                      key={user.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "6px 10px",
-                        borderBottom: idx < users.length - 1 ? "1px solid #222" : "none",
-                        background: idx === 0 ? "rgba(255,215,0,0.05)" : idx === 1 ? "rgba(192,192,192,0.03)" : idx === 2 ? "rgba(205,127,50,0.03)" : "transparent",
-                        transition: "background 0.15s",
-                        cursor: "default",
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#222"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = idx === 0 ? "rgba(255,215,0,0.05)" : idx === 1 ? "rgba(192,192,192,0.03)" : idx === 2 ? "rgba(205,127,50,0.03)" : "transparent"; }}
-                    >
-                      {/* Medal/Rank */}
-                      <div style={getMedalStyle(idx)}>
-                        {idx + 1}
-                      </div>
-
+                    <div key={user.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-800/40 transition-colors">
                       {/* Avatar */}
-                      <div style={{ width: "32px", height: "32px", overflow: "hidden", borderRadius: "4px", background: "#111", border: "1px solid #333", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div className="w-12 h-14 overflow-hidden shrink-0 flex items-end justify-center">
                         <HabboAvatar look={user.look} size="small" direction={2} />
                       </div>
 
                       {/* Name + Value */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: "12px", fontWeight: "600", color: "#ddd", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{user.username}</div>
-                        <div style={{ fontSize: "10px", color: cfg.color, fontWeight: "500" }}>{cfg.getValue(user)}</div>
+                      <div className="flex-1 min-w-0">
+                        <button
+                          onClick={() => navigate(`/user/${user.username}`)}
+                          className="text-sm font-bold text-white hover:text-purple-400 transition-colors truncate block text-left"
+                        >
+                          {user.username}
+                        </button>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <img src={cfg.valueIcon} alt="" className="w-3.5 h-3.5 shrink-0" style={{ imageRendering: "pixelated" }} />
+                          <span className="text-xs text-zinc-400">{cfg.getValue(user)} {cfg.valueSuffix}</span>
+                        </div>
                       </div>
+
+                      {/* Medal for top 3 */}
+                      <MedalBadge index={idx} />
                     </div>
                   ))
                 )}

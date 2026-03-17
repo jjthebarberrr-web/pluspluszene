@@ -226,3 +226,48 @@ async def vote_in_election(election_id: int, req: VoteRequest, request: Request)
             )
         await conn.commit()
     return {"ok": True, "message": "Vote cast successfully!"}
+
+
+@router.get("/history")
+async def get_staff_history():
+    """Get former government officials who were demoted/stepped down."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            # Check if staff_history table exists, create if not
+            await cur.execute("""
+                CREATE TABLE IF NOT EXISTS staff_history (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    user_id INT NOT NULL,
+                    rank_id INT NOT NULL,
+                    rank_name VARCHAR(100) NOT NULL,
+                    started_at INT DEFAULT 0,
+                    ended_at INT DEFAULT 0,
+                    reason VARCHAR(255) DEFAULT 'Stepped down'
+                )
+            """)
+            await conn.commit()
+
+            # Get history records joined with user data
+            await cur.execute("""
+                SELECT sh.id, sh.user_id, u.username, u.look, u.motto, sh.rank_id, sh.rank_name, sh.started_at, sh.ended_at, sh.reason
+                FROM staff_history sh
+                JOIN users u ON sh.user_id = u.id
+                ORDER BY sh.ended_at DESC
+            """)
+            rows = await cur.fetchall()
+            members = []
+            for r in rows:
+                members.append({
+                    "id": r[0], "user_id": r[1], "username": r[2],
+                    "look": r[3], "motto": r[4] or "",
+                    "rank_id": r[5], "rank_name": r[6],
+                    "started_at": r[7], "ended_at": r[8],
+                    "reason": r[9] or "Stepped down",
+                })
+
+            # Also get users who WERE staff (rank >= 6) but got demoted to rank < 6
+            # by checking if any users have rank < 6 but appear in staff_history
+            # For now, also include any users that were manually added
+
+    return {"members": members}

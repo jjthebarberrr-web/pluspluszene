@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { apiGet, apiPost, isLoggedIn } from "../api";
 import { HabboAvatar } from "../components/HabboAvatar";
 
@@ -432,16 +433,18 @@ export function NewsPage() {
               >
                 {/* Thumbnail */}
                 <div style={{
-                  width: "80px",
-                  height: "80px",
+                  width: "60px",
+                  height: "60px",
                   backgroundImage: article.image_url ? `url(${article.image_url})` : `linear-gradient(135deg, ${categoryColors[article.category] || "#5C229E"}, #333)`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   flexShrink: 0,
+                  borderRadius: "50%",
+                  margin: "10px 0 10px 10px",
                 }} />
                 {/* Details */}
                 <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
-                  <div style={{
+                  <Link to={`/news/${article.id}`} style={{
                     fontSize: "13px",
                     fontWeight: "600",
                     color: "#ddd",
@@ -449,9 +452,10 @@ export function NewsPage() {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
+                    textDecoration: "none",
                   }}>
                     {article.title}
-                  </div>
+                  </Link>
                   <div style={{ fontSize: "11px", color: "#777", marginTop: "4px" }}>
                     {formatDate(article.created_at)}
                   </div>

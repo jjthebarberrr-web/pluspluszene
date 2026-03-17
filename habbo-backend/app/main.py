@@ -24,6 +24,9 @@ from app.routes.vip_routes import router as vip_router
 from app.routes.housekeeping_routes import router as housekeeping_router
 from app.routes.radio_routes import router as radio_router
 from app.routes.room_routes import router as room_router
+from app.routes.notification_routes import router as notification_router
+from app.routes.rare_items_routes import router as rare_items_router
+from app.routes.battlepass_routes import router as battlepass_router
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
@@ -56,6 +59,9 @@ app.include_router(vip_router)
 app.include_router(housekeeping_router)
 app.include_router(radio_router)
 app.include_router(room_router)
+app.include_router(notification_router)
+app.include_router(rare_items_router)
+app.include_router(battlepass_router)
 
 
 @app.get("/healthz")

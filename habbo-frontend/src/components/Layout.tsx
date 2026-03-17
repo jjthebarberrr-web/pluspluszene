@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { isLoggedIn, getUsername, clearAuth, apiGet } from "../api";
 import { useState, useEffect, useCallback } from "react";
-import { LogOut, ChevronDown, Gamepad2, Settings, HelpCircle, User } from "lucide-react";
+import { LogOut, ChevronDown, Gamepad2, Settings, HelpCircle, User, Menu, X, Bell } from "lucide-react";
 import { HabboAvatar } from "./HabboAvatar";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -16,6 +16,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [onlineCount, setOnlineCount] = useState(0);
   const [factIndex, setFactIndex] = useState(0);
   const [userRank, setUserRank] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileCommunityOpen, setMobileCommunityOpen] = useState(false);
+  const [mobileStaffOpen, setMobileStaffOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{id: number; type: string; message: string; read: boolean; created_at: number; link?: string}>>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const facts = [
     "Did you know: This website and theme was coded by JJ",
@@ -55,10 +61,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
     return () => clearInterval(onlineInterval);
   }, [loggedIn]);
 
+  useEffect(() => {
+    if (!loggedIn) return;
+    const fetchNotifs = () => {
+      apiGet("/api/notifications").then((data) => {
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unread_count || 0);
+      }).catch(() => {});
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 15000);
+    return () => clearInterval(interval);
+  }, [loggedIn]);
+
+  const markAllRead = () => {
+    apiGet("/api/notifications/read-all").then(() => {
+      setUnreadCount(0);
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    }).catch(() => {});
+  };
+
   const handleLogout = () => {
     clearAuth();
     navigate("/");
   };
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setMobileCommunityOpen(false);
+    setMobileStaffOpen(false);
+  }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
   const isAnyCommunityActive = () =>
@@ -66,7 +98,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const isAnyStaffActive = () =>
     isActive("/staff") || isActive("/old-staff") || isActive("/event-staff") || isActive("/dj-staff");
 
-  // Don't show layout chrome on client page
+  const formatNotifTime = (ts: number) => {
+    const diff = Math.floor(Date.now() / 1000) - ts;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  };
+
   if (location.pathname === "/client") {
     return <>{children}</>;
   }
@@ -115,6 +154,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           alt="HabPlus Banner"
           className="absolute inset-0 w-full h-full object-cover"
           style={{imageRendering: 'pixelated'}}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
         {/* Dark overlay for readability */}
         <div className="absolute inset-0" style={{background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)'}} />
@@ -149,12 +189,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Login/Register on right (only when not logged in) */}
         {!loggedIn && (
-          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-3 z-10">
             <Link to="/login" className="px-5 py-2 bg-zinc-800/80 hover:bg-zinc-700 text-white text-sm rounded border border-zinc-600 transition-all font-medium">Login</Link>
             <span className="text-zinc-400 text-sm">or</span>
             <Link to="/register" className="px-5 py-2 bg-gradient-to-r from-purple-600 to-teal-500 hover:from-purple-700 hover:to-teal-600 text-white text-sm rounded font-semibold transition-all shadow-lg">Register for free!</Link>
+          </div>
+        )}
+        {!loggedIn && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex md:hidden items-center gap-2 z-10">
+            <Link to="/login" className="px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-700 text-white text-xs rounded border border-zinc-600 transition-all font-medium">Login</Link>
+            <Link to="/register" className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-teal-500 text-white text-xs rounded font-semibold transition-all">Register</Link>
           </div>
         )}
       </div>
@@ -174,7 +219,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {loggedIn && (
         <nav className="shadow-lg relative z-50" style={{background: 'linear-gradient(180deg, #4a0a0a 0%, #2a0505 100%)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '2px'}}>
           <div className="max-w-6xl mx-auto px-4">
-            <ul className="flex items-center gap-0" style={{fontFamily: "'Ubuntu', 'Roboto', sans-serif", fontWeight: 500, fontSize: '13px'}}>
+            <ul className="hidden lg:flex items-center gap-0" style={{fontFamily: "'Ubuntu', 'Roboto', sans-serif", fontWeight: 500, fontSize: '13px'}}>
               {/* Home */}
               <li>
                 <Link
@@ -209,7 +254,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 onMouseEnter={() => setCommunityOpen(true)}
                 onMouseLeave={() => setCommunityOpen(false)}
               >
-                <button
+                <Link
+                  to="/community"
                   className={`flex items-center gap-1.5 px-4 py-2.5 transition-all border border-transparent hover:border-white/30 ${
                     isAnyCommunityActive()
                       ? "bg-black/40 text-white border-white/30"
@@ -217,7 +263,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   Community<img src="https://fresh-hotel.org/image/nav/icon_203.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
-                </button>
+                </Link>
                 {communityOpen && (
                   <ul className="absolute top-full left-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl min-w-52 z-50">
                     <li>
@@ -294,6 +340,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
 
+
               {/* Economy Guide */}
               <li>
                 <Link
@@ -318,7 +365,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       : "text-red-100 hover:bg-black/20 hover:text-white"
                   }`}
                 >
-                  Store 🛍️
+                  Store <img src="https://images.habbo.com/c_images/catalogue/icon_68.png" alt="" className="w-4 h-4" style={{imageRendering: 'pixelated'}} />
                 </Link>
               </li>
 
@@ -338,7 +385,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </li>
               )}
 
-              {/* Me Dropdown - avatar + username like Fresh Hotel */}
+              {/* Notification Bell */}
+              <li className="relative ml-auto" onMouseEnter={() => setNotifOpen(true)} onMouseLeave={() => setNotifOpen(false)}>
+                <button className="flex items-center px-3 py-2.5 text-red-100 hover:text-white transition-all relative">
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+                </button>
+                {notifOpen && (
+                  <div className="absolute top-full right-0 bg-zinc-900 border border-zinc-700 rounded-b shadow-xl w-80 z-50 max-h-96 overflow-y-auto">
+                    <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800">
+                      <span className="text-sm font-bold text-white">Notifications</span>
+                      {unreadCount > 0 && <button onClick={markAllRead} className="text-xs text-teal-400 hover:text-teal-300">Mark all read</button>}
+                    </div>
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-zinc-500 text-sm">No notifications yet</div>
+                    ) : notifications.slice(0, 20).map((n) => (
+                      <div key={n.id} onClick={() => { if (n.link) navigate(n.link); setNotifOpen(false); }} className={`px-4 py-3 border-b border-zinc-800 hover:bg-zinc-800/50 transition-all cursor-pointer ${!n.read ? "bg-zinc-800/30" : ""}`}>
+                        <div className="text-sm text-zinc-300">{n.message}</div>
+                        <div className="text-xs text-zinc-600 mt-1">{formatNotifTime(n.created_at)}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </li>
+
+              {/* Me Dropdown */}
               <li
                 className="relative"
                 onMouseEnter={() => setMeOpen(true)}
@@ -382,6 +453,85 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </li>
 
             </ul>
+
+            {/* Mobile Nav */}
+            <div className="flex lg:hidden items-center justify-between py-2">
+              <button onClick={() => { setMobileMenuOpen(!mobileMenuOpen); setNotifOpen(false); }} className="flex items-center gap-2 text-red-100 hover:text-white transition-all">
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                <span className="text-sm font-bold">Menu</span>
+              </button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => { setNotifOpen(!notifOpen); setMobileMenuOpen(false); }} className="relative text-red-100 hover:text-white">
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+                </button>
+                {userLook && (
+                  <Link to={`/user/${username}`} className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full overflow-hidden bg-zinc-800 border border-zinc-600 flex items-center justify-center"><HabboAvatar look={userLook} size="small" headOnly={true} /></div>
+                    <span className="text-sm font-bold text-red-100">{username}</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+            {/* Mobile Notifications */}
+            {notifOpen && (
+              <div className="lg:hidden bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl mb-2 max-h-64 overflow-y-auto">
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800">
+                  <span className="text-sm font-bold text-white">Notifications</span>
+                  {unreadCount > 0 && <button onClick={markAllRead} className="text-xs text-teal-400 hover:text-teal-300">Mark all read</button>}
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="px-4 py-4 text-center text-zinc-500 text-sm">No notifications yet</div>
+                ) : notifications.slice(0, 10).map((n) => (
+                  <div key={n.id} onClick={() => { if (n.link) navigate(n.link); setNotifOpen(false); }} className={`px-4 py-3 border-b border-zinc-800 hover:bg-zinc-800/50 ${!n.read ? "bg-zinc-800/30" : ""}`}>
+                    <div className="text-sm text-zinc-300">{n.message}</div>
+                    <div className="text-xs text-zinc-600 mt-1">{formatNotifTime(n.created_at)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Mobile Menu */}
+            {mobileMenuOpen && (
+              <div className="lg:hidden border-t border-white/10 py-2 space-y-0.5" style={{fontFamily: "'Ubuntu', 'Roboto', sans-serif", fontSize: '14px'}}>
+                <Link to="/" className={`block px-4 py-2.5 rounded ${location.pathname === "/" ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Home</Link>
+                <Link to="/news" className={`block px-4 py-2.5 rounded ${isActive("/news") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>News</Link>
+                <div>
+                  <button onClick={() => setMobileCommunityOpen(!mobileCommunityOpen)} className={`w-full flex items-center justify-between px-4 py-2.5 rounded ${isAnyCommunityActive() ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>
+                    <span>Community</span><ChevronDown className={`w-4 h-4 transition-transform ${mobileCommunityOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {mobileCommunityOpen && (
+                    <div className="pl-6 space-y-0.5 mt-0.5">
+                      <Link to="/photos" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white rounded hover:bg-black/20">Photos</Link>
+                      <Link to="/vip-list" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white rounded hover:bg-black/20">VIP List</Link>
+                      <Link to="/rare-values" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white rounded hover:bg-black/20">Rare Values</Link>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <button onClick={() => setMobileStaffOpen(!mobileStaffOpen)} className={`w-full flex items-center justify-between px-4 py-2.5 rounded ${isAnyStaffActive() ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>
+                    <span>Staff</span><ChevronDown className={`w-4 h-4 transition-transform ${mobileStaffOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {mobileStaffOpen && (
+                    <div className="pl-6 space-y-0.5 mt-0.5">
+                      <Link to="/staff" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white rounded hover:bg-black/20">Current Staff</Link>
+                      <Link to="/old-staff" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white rounded hover:bg-black/20">Former Officials</Link>
+                      <Link to="/event-staff" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white rounded hover:bg-black/20">Event Staff</Link>
+                      <Link to="/dj-staff" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white rounded hover:bg-black/20">DJ Staff</Link>
+                    </div>
+                  )}
+                </div>
+                <Link to="/leaderboards" className={`block px-4 py-2.5 rounded ${isActive("/leaderboards") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Leaderboards</Link>
+                <Link to="/economy" className={`block px-4 py-2.5 rounded ${isActive("/economy") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Economy</Link>
+                <Link to="/store" className={`block px-4 py-2.5 rounded ${isActive("/store") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Store</Link>
+                {userRank >= 6 && <Link to="/housekeeping" className={`block px-4 py-2.5 rounded ${isActive("/housekeeping") ? "bg-black/40 text-white" : "text-red-100 hover:bg-black/20"}`}>Housekeeping</Link>}
+                <div className="border-t border-white/10 pt-2 mt-2 space-y-0.5">
+                  <Link to={`/user/${username}`} className="block px-4 py-2.5 text-zinc-300 hover:text-white rounded hover:bg-black/20"><span className="flex items-center gap-2"><User className="w-4 h-4" /> My Profile</span></Link>
+                  <Link to="/settings" className="block px-4 py-2.5 text-zinc-300 hover:text-white rounded hover:bg-black/20"><span className="flex items-center gap-2"><Settings className="w-4 h-4" /> Settings</span></Link>
+                  <Link to="/help" className="block px-4 py-2.5 text-zinc-300 hover:text-white rounded hover:bg-black/20"><span className="flex items-center gap-2"><HelpCircle className="w-4 h-4" /> Help & FAQ</span></Link>
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2.5 text-red-400 hover:text-red-300 rounded hover:bg-black/20"><span className="flex items-center gap-2"><LogOut className="w-4 h-4" /> Logout</span></button>
+                </div>
+              </div>
+            )}
           </div>
         </nav>
       )}
@@ -393,16 +543,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-900 bg-black mt-12">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Gamepad2 className="w-5 h-5 text-purple-500" />
-              <span className="font-bold text-zinc-500">HabPlus</span>
+      <footer className="border-t border-zinc-800 bg-zinc-950 mt-12">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Brand */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Gamepad2 className="w-5 h-5 text-purple-500" />
+                <span className="font-bold text-zinc-300">HabPlus</span>
+              </div>
+              <p className="text-xs text-zinc-600 leading-relaxed">Your retro hotel experience. Build rooms, make friends, and explore the community.</p>
             </div>
-            <p className="text-xs text-zinc-600">
-              Powered by Nitro HTML5 &amp; Arcturus Morningstar | Not affiliated with Sulake
-            </p>
+            {/* Quick Links */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Quick Links</span>
+              <Link to="/news" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">News</Link>
+              <Link to="/community" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Community</Link>
+              <Link to="/leaderboards" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Leaderboards</Link>
+              <Link to="/store" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Store</Link>
+            </div>
+            {/* Info */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Information</span>
+              <Link to="/help" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Help & FAQ</Link>
+              <Link to="/staff" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Staff Team</Link>
+              <Link to="/economy" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Economy Guide</Link>
+            </div>
+          </div>
+          <div className="border-t border-zinc-800 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-xs text-zinc-600">&copy; {new Date().getFullYear()} HabPlus. All rights reserved.</p>
+            <p className="text-xs text-zinc-700">Powered by Nitro HTML5 &amp; Arcturus Morningstar | Not affiliated with Sulake</p>
           </div>
         </div>
       </footer>

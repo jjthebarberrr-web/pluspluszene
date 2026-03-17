@@ -24,8 +24,10 @@ interface UserProfile {
 }
 
 const rankLabels: Record<number, string> = {
-  1: "Member", 2: "VIP", 3: "X", 4: "Support",
-  5: "Moderator", 6: "Super Mod", 7: "Administrator",
+  1: "Citizen", 2: "VIP Bronze", 3: "VIP Silver", 4: "VIP Gold",
+  5: "VIP Platinum", 6: "DJ", 7: "Event Staff", 8: "Event Manager",
+  9: "Representative", 10: "Senator", 11: "Governor", 12: "Vice President",
+  13: "President", 14: "Elite", 15: "Elite+", 16: "Owner",
 };
 
 export function MePage() {

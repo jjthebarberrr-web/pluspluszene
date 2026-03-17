@@ -1,0 +1,477 @@
+/* Classic Old-School Habbo Theme - Retro Style */
+
+/* Root color variables - Classic Habbo blue/green palette */
+:root {
+  --habbo-blue: #417a9b;
+  --habbo-blue-dark: #2e5a73;
+  --habbo-blue-light: #5a9abb;
+  --habbo-green: #7bb534;
+  --habbo-teal: #3d8ea5;
+  --habbo-bg: #689dc6;
+  --habbo-card-bg: #c8dce8;
+  --habbo-card-border: #7ba1bf;
+  --habbo-header-bg: #417a9b;
+  --habbo-text: #1a3a50;
+  --habbo-text-light: #ffffff;
+  --habbo-input-bg: #ffffff;
+  --habbo-button-bg: #5ca832;
+  --habbo-button-hover: #4d8f2a;
+}
+
+/* General body & background - Classic blue sky */
+body, #root {
+  background: #689dc6 !important;
+  font-family: "Ubuntu", "Verdana", "Arial", sans-serif !important;
+}
+
+/* ========== LOADING SCREEN - Old School ========== */
+.nitro-loading {
+  background: linear-gradient(180deg, #4a8db8 0%, #2a5a7a 40%, #1a3a50 100%) !important;
+}
+
+.nitro-loading .progress {
+  border-radius: 4px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid rgba(255,255,255,0.2) !important;
+  overflow: hidden !important;
+  height: 20px !important;
+}
+
+.nitro-loading .progress-bar {
+  background: linear-gradient(180deg, #7bb534, #5a8a28) !important;
+  border-radius: 2px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3) !important;
+}
+
+/* Loading logo/text */
+.nitro-loading img {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)) !important;
+}
+
+/* ========== TOOLBAR - Classic Habbo Bottom Bar ========== */
+.nitro-toolbar {
+  background: linear-gradient(180deg, #3a6a8a 0%, #2a4a65 100%) !important;
+  border-top: 2px solid #5a9abb !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.3) !important;
+}
+
+.nitro-toolbar .toolbar-icon-container {
+  border-radius: 4px !important;
+  transition: all 0.1s ease !important;
+}
+
+.nitro-toolbar .toolbar-icon-container:hover {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.15) !important;
+  background: rgba(255,255,255,0.1) !important;
+}
+
+/* ========== HOTEL VIEW / LANDING - Classic Reception ========== */
+.nitro-hotel-view {
+  background: #689dc6 !important;
+}
+
+/* Landing page widget - Old school Habbo info box */
+.widgetcontainer.widget {
+  background: #c8dce8 !important;
+  border-radius: 6px !important;
+  border: 2px solid #7ba1bf !important;
+  backdrop-filter: none !important;
+  box-shadow: 1px 1px 0 #5a8aaa, 2px 2px 0 rgba(0,0,0,0.15) !important;
+  padding: 12px !important;
+  margin: 8px !important;
+  max-width: 380px !important;
+}
+
+.widgetcontainer.widget .d-flex.flex-column.align-self-center {
+  text-align: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.widgetcontainer.widget h3 {
+  text-align: center !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #1a3a50 !important;
+  text-shadow: none !important;
+  margin-bottom: 6px !important;
+}
+
+.widgetcontainer.widget i {
+  text-align: center !important;
+  display: block !important;
+  font-size: 0.85rem !important;
+  color: #2a4a65 !important;
+  line-height: 1.4 !important;
+  margin-bottom: 10px !important;
+}
+
+.widgetcontainer.widget button {
+  display: block !important;
+  margin: 6px auto !important;
+  padding: 8px 24px !important;
+  background: linear-gradient(180deg, #7bb534 0%, #5a8a28 100%) !important;
+  border: 1px solid #4a7a20 !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  font-weight: bold !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.2) !important;
+  transition: all 0.1s ease !important;
+  letter-spacing: 0 !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3) !important;
+}
+
+.widgetcontainer.widget button:hover {
+  transform: none !important;
+  filter: brightness(1.1) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+
+.widgetcontainer.widget img {
+  border-radius: 4px !important;
+  max-height: 100px !important;
+  object-fit: cover !important;
+  border: 1px solid #7ba1bf !important;
+}
+
+.widget-slot.slot-1 {
+  max-width: 400px !important;
+}
+
+.widgetcontainer-image {
+  min-height: 80px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-radius: 4px 0 0 4px !important;
+  opacity: 1 !important;
+}
+
+/* ========== NAVIGATOR - Classic Style ========== */
+.nitro-navigator {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.15) !important;
+}
+
+.nitro-navigator .nav-tabs .nav-link {
+  border-radius: 4px 4px 0 0 !important;
+  transition: none !important;
+  color: #1a3a50 !important;
+  background: #b0c8d8 !important;
+  border: 1px solid #7ba1bf !important;
+  margin-right: 2px !important;
+  font-size: 0.85rem !important;
+  font-weight: bold !important;
+}
+
+.nitro-navigator .nav-tabs .nav-link.active {
+  background: #417a9b !important;
+  color: #fff !important;
+  border-color: #2e5a73 !important;
+}
+
+/* ========== CATALOG - Old School Habbo Catalog ========== */
+.nitro-catalog {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.15) !important;
+}
+
+.nitro-catalog .nav-link {
+  border-radius: 3px !important;
+  transition: none !important;
+  font-size: 0.8rem !important;
+  color: #1a3a50 !important;
+}
+
+.nitro-catalog .nav-link.active {
+  background: #417a9b !important;
+  color: #fff !important;
+  font-weight: bold !important;
+}
+
+/* Catalog items grid */
+.nitro-catalog .grid-item,
+.catalog-item {
+  border-radius: 3px !important;
+  border: 1px solid #7ba1bf !important;
+  background: #e8f0f5 !important;
+  transition: none !important;
+}
+
+.catalog-item:hover {
+  border-color: #417a9b !important;
+  background: #d0e2ee !important;
+  box-shadow: none !important;
+}
+
+/* ========== INVENTORY - Classic Style ========== */
+.nitro-inventory {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.15) !important;
+}
+
+.inventory-item {
+  border-radius: 3px !important;
+  border: 1px solid #7ba1bf !important;
+  background: #e8f0f5 !important;
+  transition: none !important;
+}
+
+.inventory-item:hover {
+  border-color: #417a9b !important;
+  background: #d0e2ee !important;
+  box-shadow: none !important;
+}
+
+/* ========== CARD HEADERS - Classic Blue Bar ========== */
+.nitro-card-header {
+  background: linear-gradient(180deg, #5a9abb 0%, #417a9b 100%) !important;
+  border-radius: 4px 4px 0 0 !important;
+  border-bottom: 1px solid #2e5a73 !important;
+}
+
+.nitro-card-header-text {
+  color: #fff !important;
+  font-weight: bold !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3) !important;
+  font-size: 0.9rem !important;
+}
+
+/* ========== CARD CONTENT ========== */
+.nitro-card-content {
+  background: #d8e8f0 !important;
+}
+
+/* ========== CHAT BUBBLES - Classic Habbo Style ========== */
+.chat-bubble {
+  border-radius: 8px !important;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.2) !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== CHAT INPUT - Classic ========== */
+.nitro-chat-input {
+  border-radius: 6px !important;
+  background: rgba(255,255,255,0.9) !important;
+  border: 2px solid #7ba1bf !important;
+  backdrop-filter: none !important;
+}
+
+.nitro-chat-input input {
+  background: transparent !important;
+  color: #1a3a50 !important;
+  border: none !important;
+}
+
+/* ========== BUTTONS - Classic Green Habbo Buttons ========== */
+.btn-primary {
+  background: linear-gradient(180deg, #5a9abb 0%, #417a9b 100%) !important;
+  border: 1px solid #2e5a73 !important;
+  border-radius: 4px !important;
+  transition: none !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.15) !important;
+  color: #fff !important;
+  font-weight: bold !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2) !important;
+}
+
+.btn-primary:hover {
+  transform: none !important;
+  filter: brightness(1.1) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.15) !important;
+}
+
+.btn-success {
+  background: linear-gradient(180deg, #7bb534 0%, #5a8a28 100%) !important;
+  border: 1px solid #4a7a20 !important;
+  border-radius: 4px !important;
+  transition: none !important;
+  color: #fff !important;
+  font-weight: bold !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2) !important;
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, #d44 0%, #b33 100%) !important;
+  border: 1px solid #922 !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  font-weight: bold !important;
+}
+
+/* ========== SCROLLBAR - Classic thin ========== */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #b0c8d8 !important;
+  border-radius: 0 !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #7ba1bf !important;
+  border-radius: 2px !important;
+  border: 1px solid #5a8aaa !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a8aaa !important;
+}
+
+/* ========== ROOM INFO ========== */
+.nitro-room-info {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== FRIENDS LIST ========== */
+.nitro-friends {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== AVATAR EDITOR ========== */
+.nitro-avatar-editor {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== NOTIFICATIONS ========== */
+.notification-bubble {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+/* ========== PURSE (currency bar) ========== */
+.nitro-purse {
+  background: linear-gradient(180deg, #3a6a8a 0%, #2a4a65 100%) !important;
+  border: 1px solid #5a9abb !important;
+  border-radius: 4px !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== CONTEXT MENU ========== */
+.nitro-context-menu {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+/* ========== FORM INPUTS ========== */
+.form-control, .form-select {
+  background: #ffffff !important;
+  border: 1px solid #7ba1bf !important;
+  border-radius: 3px !important;
+  color: #1a3a50 !important;
+  transition: none !important;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #417a9b !important;
+  box-shadow: 0 0 3px rgba(65,122,155,0.3) !important;
+}
+
+/* ========== DROPDOWN MENUS ========== */
+.dropdown-menu {
+  background: #c8dce8 !important;
+  border: 1px solid #7ba1bf !important;
+  border-radius: 4px !important;
+  backdrop-filter: none !important;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+.dropdown-item {
+  color: #1a3a50 !important;
+  border-radius: 2px !important;
+  transition: none !important;
+}
+
+.dropdown-item:hover {
+  background: #417a9b !important;
+  color: #fff !important;
+}
+
+/* ========== TOOLTIPS ========== */
+.tooltip-inner {
+  background: #2a4a65 !important;
+  border: 1px solid #5a9abb !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== CAMERA UI ========== */
+.nitro-camera {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+}
+
+/* ========== BADGE IMAGES ========== */
+.badge-image {
+  border-radius: 2px !important;
+  transition: none !important;
+}
+
+.badge-image:hover {
+  transform: scale(1.05) !important;
+}
+
+/* ========== INFO WIDGET (top-left) - Classic Style ========== */
+.nitro-card.nitro-notification-center,
+.draggable-window .nitro-card,
+div[class*="info-stand"],
+div[class*="InfoStand"] {
+  background: #c8dce8 !important;
+  border: 2px solid #7ba1bf !important;
+  border-radius: 6px !important;
+  backdrop-filter: none !important;
+}
+
+/* ========== DISABLE ALL MODERN BLUR/ANIMATIONS ========== */
+* {
+  transition-timing-function: linear !important;
+  transition-duration: 0.05s !important;
+}
+
+/* Ensure no backdrop-filter anywhere */
+.nitro-toolbar,
+.nitro-navigator,
+.nitro-catalog,
+.nitro-inventory,
+.nitro-friends,
+.nitro-avatar-editor,
+.nitro-room-info,
+.nitro-chat-input,
+.notification-bubble,
+.nitro-context-menu,
+.dropdown-menu {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
